@@ -23,3 +23,10 @@ Run the following to get started
 
 #### Hookup on facebook 
 Now that we have this running, you can hook this up to facebook and should be able to message the app
+
+#### Setup App-Engine
+- Download and install AppEngine from (here)[https://cloud.google.com/appengine/docs/standard/python/download]
+- Install requirements: `pip install -t lib -r requirements.txt`
+- Run the dev server: `dev_appserver.py app.yaml --port 5000`
+  - Visit http://localhost:5000
+- Deploy the app: `gcloud app deploy`

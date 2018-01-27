@@ -14,42 +14,49 @@ bot = Bot(ACCESS_TOKEN)
 #We will receive messages that Facebook sends our bot at this endpoint 
 @app.route("/", methods=['GET', 'POST'])
 def receive_message():
-    if request.method == 'GET':
-        """Before allowing people to message your bot, Facebook has implemented a verify token
-        that confirms all requests that your bot receives came from Facebook.""" 
-        token_sent = request.args.get("hub.verify_token")
-        return verify_fb_token(token_sent)
-    #if the request was not get, it must be POST and we can just proceed with sending a message back to user
-    else:
-        # get whatever message a user sent the bot
-       output = request.get_json()
-       for event in output['entry']:
-          print(event)
-          messaging = event['messaging']
-          for message in messaging:
-            recipient_id = message['sender']['id']
-            if message.get('message'):
-                #Facebook Messenger ID for user so we know where to send response back to
-                if message['message'].get('text'):
-                    response_sent_text = get_message()
-                    handle_response(bot.send_text_message(recipient_id, response_sent_text))
-                #if user sends us a GIF, photo,video, or any other non-text item
-                if message['message'].get('attachments'):
-                    response_sent_nontext = get_message()
-                    handle_response(bot.send_text_message(recipient_id, response_sent_nontext))
-            elif message.get('postback'):
-                if message['postback'].get('payload'):
-                    payload = message['postback']['payload']
-                    
-                    if payload == "Coinbase-Coindelta":
-                        arbs = calculate_arb.coinbase_coindelta()
-                        #msg = arbs_to_message(arbs)
-                        msg = arbs_to_list_message(arbs)
-                        #print(msg)
-                        handle_response(bot.send_message(recipient_id,msg))
-                    else:
-                        handle_response(bot.send_text_message(recipient_id, ("%s not supported yet!" % payload)))
-
+    try:
+        if request.method == 'GET':
+            """Before allowing people to message your bot, Facebook has implemented a verify token
+            that confirms all requests that your bot receives came from Facebook.""" 
+            token_sent = request.args.get("hub.verify_token")
+            return verify_fb_token(token_sent)
+        #if the request was not get, it must be POST and we can just proceed with sending a message back to user
+        else:
+            # get whatever message a user sent the bot
+           output = request.get_json()
+           for event in output['entry']:
+              print(event)
+              messaging = event['messaging']
+              for message in messaging:
+                recipient_id = message['sender']['id']
+                if message.get('message'):
+                    #Facebook Messenger ID for user so we know where to send response back to
+                    if message['message'].get('text'):
+                        response_sent_text = get_message()
+                        handle_response(bot.send_text_message(recipient_id, response_sent_text))
+                    #if user sends us a GIF, photo,video, or any other non-text item
+                    if message['message'].get('attachments'):
+                        response_sent_nontext = get_message()
+                        handle_response(bot.send_text_message(recipient_id, response_sent_nontext))
+                elif message.get('postback'):
+                    if message['postback'].get('payload'):
+                        payload = message['postback']['payload']
+                        
+                        if payload == "Coinbase-Coindelta":
+                            arbs = calculate_arb.coinbase_coindelta()
+                            #msg = arbs_to_message(arbs)
+                            msg = arbs_to_list_message(arbs)
+                            #print(msg)
+                            handle_response(bot.send_message(recipient_id,msg))
+                        else:
+                            handle_response(bot.send_text_message(recipient_id, ("%s not supported yet!" % payload)))
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+    except:
+        print "Unexpected error:", sys.exc_info()[0]
+        raise
+    print "Message Processed"
     return "Message Processed"
 
 #def arbs_to_message(arbs):
