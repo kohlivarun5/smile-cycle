@@ -29,4 +29,5 @@ Now that we have this running, you can hook this up to facebook and should be ab
 - Install requirements: `pip install -t lib -r requirements.txt`
 - Run the dev server: `dev_appserver.py app.yaml --port 5000`
   - Visit http://localhost:5000
-- Deploy the app: `gcloud app deploy`
+- Deploy the app: `gcloud app deploy` 
+- Remember to switch the url in Facebook when you switch between dev and prod
