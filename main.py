@@ -3,12 +3,14 @@ import random
 from flask import Flask, request
 from pymessenger import Bot,Element
 
+import logging
+
 import calculate_arb
 
 # https://developers.facebook.com/apps/159034348214729/messenger/settings/
 app = Flask(__name__)
 ACCESS_TOKEN = 'EAACQpBHVGckBAFstCjzTLaKMAaMxqtvP6m2L5o1yw3YKI7Jv6AH3ti7KfhZBfWmqDny7ovZAqqVKRbVWEvqkezjbyjTsQeN5mHMH4ZBoQStA5Hr4Qnhfps7AIvQIUxRf5EZCZCBogM5vTws8GUd348CfwNes3nOHBzENvtNdHwQZDZD'
-VERIFY_TOKEN = 'xeuz0uIE'
+VERIFY_TOKEN = 'verify_smile'
 bot = Bot(ACCESS_TOKEN)
 
 #We will receive messages that Facebook sends our bot at this endpoint 
@@ -52,9 +54,11 @@ def receive_message():
                             handle_response(bot.send_text_message(recipient_id, ("%s not supported yet!" % payload)))
     except Exception as e:
         import traceback
-        print(traceback.format_exc())
+        logging.error(traceback.format_exc())
+        logging.error(sys.exc_info()[0])
+        raise
     except:
-        print "Unexpected error:", sys.exc_info()[0]
+        logging.error(sys.exc_info()[0])
         raise
     print "Message Processed"
     return "Message Processed"
