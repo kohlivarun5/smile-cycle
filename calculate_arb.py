@@ -7,11 +7,10 @@ Each function returns the results in  a dict containing:
         "coin"  : "Base coin"
     }
 """
-import json
+
 import coindelta
 import coinbase
 import forex
-
 def coinbase_coindelta():
     prices = {}
     prices['coinbase'] = coinbase.get_prices()
@@ -34,10 +33,12 @@ def coinbase_coindelta():
           buy_flow = buy_amt * prices['forex']['bid']['usd_inr']
           profit = sell - buy_flow
           if (profit > 0):
-            result.append({'from' : i, 'to' : j, 'coin' : cur.split('_')[0], 'gain_perc' : profit*100/buy_flow})
+            result.append({'from' : i, 'to' : j, 'coin' : cur.split('_')[0].upper(), 'gain_perc' : profit*100/buy_flow})
 
     return result
 
+import binance
+import kucoin
 def binance_kucoin():
     result = []
     fees = {}
@@ -68,9 +69,13 @@ def binance_kucoin():
                 buy = buy_amt/prices[i]['ask'][cur]
                 fee = fees['binance'].get(cur1, 1) # assuming withdrawal fee as 1 if not found
                 sell = (buy - fee) * prices[j]['bid'][cur]
-                if ((sell - buy_amt)*100 > 2*buy_amt): # appending only if 2% profit
-                    result.append({'from' : i, 'to' : j, 'coin' : cur, 'gain_perc' : (sell - buy_amt)*100/buy_amt})
+                gain = (sell - buy_amt)*100
+                if (gain > 2*buy_amt and gain < 60*buy_amt) :
+                    # appending only if > 2% profit and < 60% (to prevent false positives)
+                    coin = "Buy %s using %s" % (cur1.upper(),cur2.upper())
+                    result.append({'from' : i, 'to' : j, 'coin' : coin, 'gain_perc' : (sell - buy_amt)*100/buy_amt})
     return result
 
 if __name__ == "__main__":
     print(coinbase_coindelta())
+    print(binance_kucoin())
