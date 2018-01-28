@@ -1,4 +1,4 @@
-"""
+ """
 Each function returns the results in  a dict containing:
     { 
         "from" : "From Exchange",
@@ -8,7 +8,6 @@ Each function returns the results in  a dict containing:
     }
 """
 import json
-import commands
 import coindelta
 import coinbase
 import forex
