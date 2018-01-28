@@ -1,15 +1,17 @@
-import commands
 import json
+import urllib2
 
-def get_prices(download=1):
+def query():
+  url = "https://coindelta.com/api/v1/public/getticker"
+  response = urllib2.urlopen(url, timeout = 5)
+  return json.load(response)
+
+
+def get_prices():
   prices = {}
   prices['bid'] = {}
   prices['ask'] = {}
-  if (download > 0):
-    commands.getoutput("wget -O coindelta https://coindelta.com/api/v1/public/getticker")
-  file="coindelta"
-  with open(file, 'r') as conf:
-    coindelta = json.load(conf)
+  coindelta = query()
   for market in coindelta:
     cur = market['MarketName'].split('-')
     prices['bid'][cur[0] + "_" + cur[1]] = float(market['Bid'])

@@ -1,12 +1,13 @@
 import json
-import commands
+import urllib2
 
-def get_prices(download=1):
-  if (download > 0):
-    commands.getoutput("wget -O forex https://api.fixer.io/latest")
-  file="forex"
-  with open(file, 'r') as conf:
-    exch_rates = json.load(conf)
+def query():
+  url = "https://api.fixer.io/latest"
+  response = urllib2.urlopen(url, timeout = 5)
+  return json.load(response)
+
+def get_prices():
+  exch_rates=query()
   prices = {}
   prices['bid'] = {}
   prices['ask'] = {}

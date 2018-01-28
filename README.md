@@ -13,7 +13,7 @@ Run the following to get started
 
 #### Setup App-Engine
 - Download and install AppEngine from (here)[https://cloud.google.com/appengine/docs/standard/python/download]
-- Run the dev server: `dev_appserver.py app.yaml --port 5000`
+- Run the dev server: `dev_appserver.py app.yaml --port 5000 --enable_host_checking false`
   - Visit http://localhost:5000/me
 
 #### Install ngrok and expose app 
