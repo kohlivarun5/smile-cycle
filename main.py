@@ -131,7 +131,7 @@ class WebhookHandler(webapp2.RequestHandler):
                 setEnabled(chat_id, False)
             elif text == '/hello':
                 reply(hello())
-            elif text == '/arb':
+            elif text.startswith('/arb'):
                 reply(arb())
             else:
                 reply('What command?')
