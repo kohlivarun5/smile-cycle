@@ -18,3 +18,4 @@ def get_prices(download=1):
     if 'buy' in market.keys():
       prices['bid'][cur + "_" + cur1] = float(market['buy'])
       prices['ask'][cur + "_" + cur1] = float(market['sell'])
+  return prices
