@@ -1,12 +1,12 @@
 import json
 import urllib2
 
-def query(currency,direction):
+def query(currency, direction):
   url = "https://api.coinbase.com/v2/prices/" + currency + "-USD/" + direction
   response = urllib2.urlopen(url, timeout = 5)
   return json.load(response)
 
-def get_prices(download=True):
+def get_prices():
   prices = {}
   prices['bid'] = {}
   prices['ask'] = {}
