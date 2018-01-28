@@ -62,13 +62,11 @@ class SetWebhookHandler(webapp2.RequestHandler):
             self.response.write(json.dumps(json.load(urllib2.urlopen(BASE_URL + 'setWebhook', urllib.urlencode({'url': url})))))
 
 
-
-def hello(bot, update):
-        update.message.reply_text(
-            'Hello {}'.format(update.message.from_user.first_name))
+def hello(fr):
+    return "Hello %s!" % fr.get("first_name")
 
 import calculate_arb
-def arb_msg():
+def arb():
     arbs = calculate_arb.coinbase_coindelta()
     text = ""
     for idx, arb in enumerate(arbs):
@@ -140,8 +138,10 @@ class WebhookHandler(webapp2.RequestHandler):
                 output = StringIO.StringIO()
                 img.save(output, 'JPEG')
                 reply(img=output.getvalue())
+            elif text == '/hello':
+                reply(hello())
             elif text == '/arb':
-                reply(arb_msg())
+                reply(arb())
             else:
                 reply('What command?')
 
