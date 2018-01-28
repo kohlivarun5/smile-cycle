@@ -1,6 +1,6 @@
-import commands
 import json
 import re
+import urllib2
 
 def get_fees():
   file="binance_fees"
@@ -11,18 +11,18 @@ def get_fees():
       fees[x[1].lower()] = float(x[0])
   return fees
 
-def get_prices(download=1):
+def query():
+  url = "https://api.binance.com/api/v1/ticker/24hr"
+  response = urllib2.urlopen(url, timeout=5)
+  return json.load(response)
+
+def get_prices():
   prices = {}
   prices['bid'] = {}
   prices['ask'] = {}
   prices['bqty'] = {}
   prices['aqty'] = {}
-  if (download > 0):
-    commands.getoutput("wget --no-check-certificate -O binance https://api.binance.com/api/v1/ticker/24hr")
-  file="binance"
-  with open(file, 'r') as conf:
-    binance = json.load(conf)
-
+  binance = query()
   for market in binance:
     cur = market['symbol'][0:3].lower()
     cur1 = market['symbol'][3:].lower()

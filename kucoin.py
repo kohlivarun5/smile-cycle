@@ -1,16 +1,17 @@
-import commands
+port commands
 import json
+import urllib2
 
-def get_prices(download=1):
+def query():
+  url = "https://api.kucoin.com/v1/open/tick"
+  response = urllib2.urlopen(url, timeout=5)
+  return json.load(response)
+
+def get_prices():
   prices = {}
   prices['bid'] = {}
   prices['ask'] = {}
-  if (download > 0):
-    commands.getoutput("wget --no-check-certificate -O kucoin https://api.kucoin.com/v1/open/tick")
-  file="kucoin"
-  with open(file, 'r') as conf:
-    kucoin = json.load(conf)
-
+  kucoin = query()
   for market in kucoin['data']:
     tmp = market['symbol']
     cur = tmp.split('-')[0].lower()
