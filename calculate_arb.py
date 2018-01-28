@@ -72,6 +72,5 @@ def binance_kucoin():
                     result.append({'from' : i, 'to' : j, 'coin' : cur, 'gain_perc' : (sell - buy_amt)*100/buy_amt})
     return result
 
-
 if __name__ == "__main__":
     print(coinbase_coindelta())
