@@ -69,9 +69,10 @@ def arb():
     arbs = calculate_arb.coinbase_coindelta()
     text = ""
     for idx, arb in enumerate(arbs):
+        from_,to,coin,gain_perc = arb["from"].title(),arb["to"].title(),arb["coin"].upper(),arb["gain_perc"]
         if idx == 0:
-            text += "_%s -> %s_" %(arb["from"],arb["to"])
-        text+=("\n - %s : *%.4g%%*" % (arb["coin"],arb["gain_perc"]))
+            text += "_%s -> %s_" %(from_,to)
+        text += "\n - %s : *%.4g%%*" % (coin,gain_perc)
     return text
 
 
