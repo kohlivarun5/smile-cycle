@@ -3,7 +3,7 @@ import json
 import re
 
 def get_fees():
-  file="binance.fees"
+  file="binance_fees"
   fees = {}
   with open(file, 'r') as conf:
     for line in conf:
