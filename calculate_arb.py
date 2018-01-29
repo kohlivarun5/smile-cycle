@@ -8,9 +8,9 @@ Each function returns the results in  a dict containing:
     }
 """
 
-import coindelta
-import coinbase
-import forex
+from exchanges import coindelta
+from exchanges import coinbase
+from exchanges import forex
 def coinbase_coindelta():
     prices = {}
     prices['coinbase'] = coinbase.get_prices()
@@ -37,8 +37,8 @@ def coinbase_coindelta():
 
     return result
 
-import binance
-import kucoin
+from exchanges import binance
+from exchanges import kucoin
 def binance_kucoin():
     result = []
     fees = {}

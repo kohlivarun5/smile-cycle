@@ -2,10 +2,14 @@ import json
 import re
 import urllib2
 
+import os
 def get_fees():
-  file="binance_fees"
+  #absolute dir the script is in
+  script_dir = os.path.dirname(__file__)
+  rel_path = "binance_fees"
+  abs_file_path = os.path.join(script_dir, rel_path)
   fees = {}
-  with open(file, 'r') as conf:
+  with open(abs_file_path, 'r') as conf:
     for line in conf:
       x = re.split('\s+', line)
       fees[x[1].lower()] = float(x[0])
