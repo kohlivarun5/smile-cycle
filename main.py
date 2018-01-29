@@ -60,11 +60,18 @@ class SetWebhookHandler(webapp2.RequestHandler):
             self.response.write(json.dumps(json.load(urllib2.urlopen(BASE_URL + 'setWebhook', urllib.urlencode({'url': url})))))
 
 
+
+import calculate_arb,formatting,trade
 def hello(fr):
     return "Hello %s!\nID:%s" % (fr.get("first_name"),fr.get('id'))
 
-import calculate_arb
-import formatting
+def handle_send_from(text):
+    (exchange,amount,currency) = trade.parse_send_message(text)
+    if exchange == "coinbase":
+        tx = send_coinbase_coindelta(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET,amount,currency)
+        return "Transaction committed: %s" % tx.id
+    else:
+        return "Unknown exchange: %s" % exchange
 
 class WebhookHandler(webapp2.RequestHandler):
     def post(self):
@@ -126,6 +133,8 @@ class WebhookHandler(webapp2.RequestHandler):
                 reply(formatting.text_of_arbs(calculate_arb.coinbase_coindelta()))
             elif text.startswith('/binance_kucoin'):
                 reply(formatting.text_of_arbs(calculate_arb.binance_kucoin()))
+            elif text.startswith('/send_from'):
+                reply(handle_send_from(text))
             else:
                 reply('What command?')
 
