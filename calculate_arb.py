@@ -77,25 +77,22 @@ def binance_kucoin():
     return result
 
 
-if __name__ == "__main__":
-    import unittest
-    class TestCalcs(unittest.TestCase):
-        def test_coinbase_coindelta(self):
-            arbs = coinbase_coindelta()
-            if len(arbs) != 0:
-                for arb in arbs:
-                    self.assertEqual("coinbase",arb["from"])
-                    self.assertEqual("coindelta",arb["to"])
-                    self.assertEqual(3,len(arb["coin"]))
-                    self.assertEqual("float",type(arb["gain_perc"]).__name__)
+import unittest
+class TestCalcs(unittest.TestCase):
+    def test_coinbase_coindelta(self):
+        arbs = coinbase_coindelta()
+        if len(arbs) != 0:
+            for arb in arbs:
+                self.assertEqual("coinbase",arb["from"])
+                self.assertEqual("coindelta",arb["to"])
+                self.assertEqual(3,len(arb["coin"]))
+                self.assertEqual("float",type(arb["gain_perc"]).__name__)
 
-        def test_binance_kucoin(self):
-            arbs = binance_kucoin()
-            if len(arbs) != 0:
-                for arb in arbs:
-                    self.assertEqual("coinbase",arb["from"])
-                    self.assertEqual("coindelta",arb["to"])
-                    self.assertLessEqual(3,len(arb["coin"]))
-                    self.assertEqual("float",type(arb["gain_perc"]).__name__)
-
-    unittest.main()
+    def test_binance_kucoin(self):
+        arbs = binance_kucoin()
+        if len(arbs) != 0:
+            for arb in arbs:
+                self.assertEqual("coinbase",arb["from"])
+                self.assertEqual("coindelta",arb["to"])
+                self.assertLessEqual(3,len(arb["coin"]))
+                self.assertEqual("float",type(arb["gain_perc"]).__name__)

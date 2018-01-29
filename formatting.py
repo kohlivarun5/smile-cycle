@@ -23,20 +23,16 @@ def text_of_arbs(arbs_in, default_msg="No arbitrage found!"):
     #print(text)
     return text
 
-if __name__ == "__main__":
+import unittest
+class TestFormatting(unittest.TestCase):
+    def test_empty(self): 
+        self.assertLess(0,len(text_of_arbs([])))
 
-    import unittest
-    class TestFormatting(unittest.TestCase):
-        def test_empty(self): 
-            self.assertLess(0,len(text_of_arbs([])))
-
-        def test_some(self):
-            text = text_of_arbs([{
-                "from" : "Coinbase",
-                "to"   : "Coindelta",
-                "coin" : "ETH",
-                "gain_perc" : 100.
-            }])
-            self.assertLess(0,len(text))
-
-    unittest.main()
+    def test_some(self):
+        text = text_of_arbs([{
+            "from" : "Coinbase",
+            "to"   : "Coindelta",
+            "coin" : "ETH",
+            "gain_perc" : 100.
+        }])
+        self.assertLess(0,len(text))

@@ -36,8 +36,7 @@ Run the following to get started
 
 #### Unit tests
 ```
-python2 alculate_arb.py
-python2 formatting.py
+python2 -m unittest calculate_arb formatting 
 ```
 
 #### Deploy
