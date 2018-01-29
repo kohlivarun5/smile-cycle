@@ -9,8 +9,8 @@ import calculate_arb
 
 # https://developers.facebook.com/apps/159034348214729/messenger/settings/
 app = Flask(__name__)
-ACCESS_TOKEN = 'EAACQpBHVGckBAFstCjzTLaKMAaMxqtvP6m2L5o1yw3YKI7Jv6AH3ti7KfhZBfWmqDny7ovZAqqVKRbVWEvqkezjbyjTsQeN5mHMH4ZBoQStA5Hr4Qnhfps7AIvQIUxRf5EZCZCBogM5vTws8GUd348CfwNes3nOHBzENvtNdHwQZDZD'
-VERIFY_TOKEN = 'verify_smile'
+ACCESS_TOKEN = ''
+VERIFY_TOKEN = ''
 bot = Bot(ACCESS_TOKEN)
 
 #We will receive messages that Facebook sends our bot at this endpoint 

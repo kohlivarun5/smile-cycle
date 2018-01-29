@@ -3,6 +3,15 @@ Bot to cycle
 
 Tutorial can be found [here](https://github.com/yukuku/telebot)
 
+### Create local credentials
+The app requires credentials, but we don't want them in git, 
+so create a file such as:
+- `gvim credentials.py`
+
+```
+TELEGRAM_TOKEN='<TOKEN_FROM_BOT_FATHER'
+```
+
 ### Getting started:
 Run the following to get started
 
