@@ -34,6 +34,12 @@ Run the following to get started
 #### Hookup Telegram webhook
 - Visit https://9011ccc6.ngrok.io/set_webhook?url=https://9011ccc6.ngrok.io/webhook
 
+#### Unit tests
+```
+python2 -m unittest calculate_arb.py
+python2 -m unittest formatting.py
+```
+
 #### Deploy
 - Deploy the app: `gcloud app deploy` 
-- Set the webhook url for PRO
+- Set the webhook url for PROD

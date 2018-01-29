@@ -1,0 +1,14 @@
+sudo: false
+language: python
+python:
+  - '2.7'
+cache:
+  directories:
+  - $HOME/gcloud/
+
+install:
+  - pip install -r requirements.txt
+
+script:
+  - python -m unittest calculate_arb.py
+  - python -m unittest formatting.py 

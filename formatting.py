@@ -24,7 +24,19 @@ def text_of_arbs(arbs_in, default_msg="No arbitrage found!"):
     return text
 
 if __name__ == "__main__":
-    import calculate_arb
-    print(text_of_arbs([]))
-    print(text_of_arbs(calculate_arb.coinbase_coindelta()))
-    print(text_of_arbs(calculate_arb.binance_kucoin()))
+
+    import unittest
+    class TestFormatting(unittest.TestCase):
+        def test_empty(self): 
+            self.assertLess(0,len(text_of_arbs([])))
+
+        def test_some(self):
+            text = text_of_arbs([{
+                "from" : "Coinbase",
+                "to"   : "Coindelta",
+                "coin" : "ETH",
+                "gain_perc" : 100.
+            }])
+            self.assertLess(0,len(text))
+
+    unittest.main()
