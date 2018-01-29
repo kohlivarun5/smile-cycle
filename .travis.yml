@@ -10,5 +10,5 @@ install:
   - pip install -r requirements.txt
 
 script:
-  - python -m unittest calculate_arb.py
-  - python -m unittest formatting.py 
+  - python calculate_arb.py
+  - python formatting.py 

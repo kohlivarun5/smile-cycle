@@ -63,9 +63,6 @@ class SetWebhookHandler(webapp2.RequestHandler):
 def hello(fr):
     return "Hello %s!\nID:%s" % (fr.get("first_name"),fr.get('id'))
 
-def me(fr):
-    return "ID:[%s]" % fr.get('id')
-
 import calculate_arb
 import formatting
 
