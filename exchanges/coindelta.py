@@ -17,3 +17,8 @@ def get_prices():
     prices['bid'][cur[0] + "_" + cur[1]] = float(market['Bid'])
     prices['ask'][cur[0] + "_" + cur[1]] = float(market['Ask'])
   return prices
+
+ADDRESSES = {
+    "ETH" : "0xA0fCE563cA8cAB01ef12fd2d7a1f193E37a982d2",
+    "LTC" : "LYzTCSzfCXaVVpvB5qTx7Xqz4qU7VYyVwf"
+}
