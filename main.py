@@ -13,9 +13,8 @@ from google.appengine.api import urlfetch
 from google.appengine.ext import ndb
 import webapp2
 
-TOKEN = '475606384:AAEmrgc65Cj9FogJNvH8D6LeSNSbB0B0pSU'
-
-BASE_URL = 'https://api.telegram.org/bot' + TOKEN + '/'
+import credentials
+BASE_URL = 'https://api.telegram.org/bot' + credentials.TELEGRAM_TOKEN + '/'
 
 
 # ================================
@@ -62,7 +61,7 @@ class SetWebhookHandler(webapp2.RequestHandler):
 
 
 def hello(fr):
-    return "Hello %s!" % fr.get("first_name")
+    return "Hello %s!\nID:%s" % (fr.get("first_name"),fr.get('id'))
 
 import calculate_arb
 import formatting
@@ -122,10 +121,10 @@ class WebhookHandler(webapp2.RequestHandler):
                 reply('Bot disabled')
                 setEnabled(chat_id, False)
             elif text.startswith('/hello'):
-                reply(hello())
-            elif text.startswith('/arb'):
+                reply(hello(fr))
+            elif text.startswith('/coinbase_coindelta'):
                 reply(formatting.text_of_arbs(calculate_arb.coinbase_coindelta()))
-            elif text.startswith('/crypto_arb'):
+            elif text.startswith('/binance_kucoin'):
                 reply(formatting.text_of_arbs(calculate_arb.binance_kucoin()))
             else:
                 reply('What command?')

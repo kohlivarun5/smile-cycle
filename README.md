@@ -3,6 +3,15 @@ Bot to cycle
 
 Tutorial can be found [here](https://github.com/yukuku/telebot)
 
+### Create local credentials
+The app requires credentials, but we don't want them in git, 
+so create a file such as:
+- `gvim credentials.py`
+
+```
+TELEGRAM_TOKEN='<TOKEN_FROM_BOT_FATHER'
+```
+
 ### Getting started:
 Run the following to get started
 
@@ -25,6 +34,11 @@ Run the following to get started
 #### Hookup Telegram webhook
 - Visit https://9011ccc6.ngrok.io/set_webhook?url=https://9011ccc6.ngrok.io/webhook
 
+#### Unit tests
+```
+python2 -m unittest calculate_arb formatting 
+```
+
 #### Deploy
 - Deploy the app: `gcloud app deploy` 
-- Set the webhook url for PRO
+- Set the webhook url for PROD
