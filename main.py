@@ -122,6 +122,14 @@ class WebhookHandler(webapp2.RequestHandler):
                 setEnabled(chat_id, False)
             elif text.startswith('/hello'):
                 reply(hello(fr))
+            elif text.startswith('/arb'):
+                arbs = []
+                arbs.append(calculate_arb.coinbase_coindelta())
+                arbs.append(calculate_arb.binance_kucoin())
+                direction_dict = formatting.group_arbs_by_direction(arbs_in)
+                texts = formatting.texts_of_arbs(direction_dict)
+                for text in texts:
+                    reply(text)
             elif text.startswith('/coinbase_coindelta'):
                 reply(formatting.text_of_arbs(calculate_arb.coinbase_coindelta()))
             elif text.startswith('/binance_kucoin'):
