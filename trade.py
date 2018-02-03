@@ -44,21 +44,37 @@ class TestParse(unittest.TestCase):
         self.assertEqual(("coinbase",1.2,"ETH"),parse_send_message("/send_from coinbase 1.2 ETH"))
 
 import credentials
-class TestTrade(unittest.TestCase):
-    def test_coinbase(self):
+class TestCoinbase(unittest.TestCase):
+    def test_client(self):
         client = coinbase_api.client(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET)
         user = client.get_current_user()
         self.assertEqual("3a2b719d-f765-52ba-a027-a91d1965972e",user.id)
         self.assertEqual("Varun Kohli",user.name)
+
+    def test_account(self):
+        client = coinbase_api.client(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET)
+        currencies = ["ETH","LTC","BCH"]
+        for currency in currencies:
+            account = coinbase_api.account(client,currency)
+            if account is not None:
+                self.assertLess(0,account.balance.amount) 
+
+    def test_tx(self):
+        client = coinbase_api.client(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET)
+        tx_id = "e0f5eff6-54bd-59f0-bd70-42af7d967791"
+        transaction = coinbase_api.tx(client,tx_id)
+        self.assertEqual("send",transaction.type)
+        self.assertEqual("confirmed",transaction.network.status)
+
+    def test_all(self):
+        client = coinbase_api.client(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET)
         # print(user)
         accounts = client.get_accounts()["data"]
-        print accounts
+        #print accounts
         #print(client.get_primary_account())
         for account in accounts:
             for tx in account.get_transactions()["data"]:
                 transaction = coinbase_api.tx(client,tx.id)
-                if transaction.type == "send":
-                    self.assertEqual("confirmed",transaction.network.status)
 
             #print(account.get_addresses())
             #print(client.get_addresses(account.id))

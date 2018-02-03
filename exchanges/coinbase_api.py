@@ -28,10 +28,12 @@ def client(COINBASE_API_KEY,COINBASE_API_SECRET):
 def account(client,currency):
     accounts = client.get_accounts()["data"]
     for account in accounts:
-        pass
+        if account.balance.currency == currency:
+            return account
+    return None
 
 def send(client,to,amount,currency):
-    account = client.get_primary_account()
+    acc = account(client,currency)
     try:
       tx = account.send_money(to=to, amount=amount,currency=currency)
     except TwoFactorRequiredError:
