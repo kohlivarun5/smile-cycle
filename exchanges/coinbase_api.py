@@ -1,6 +1,9 @@
 import json
 import urllib2
 
+from coinbase.wallet.error import TwoFactorRequiredError,APIError
+from coinbase.wallet.client import Client
+
 def query(currency, direction):
   url = "https://api.coinbase.com/v2/prices/" + currency + "-USD/" + direction
   response = urllib2.urlopen(url, timeout = 5)
@@ -21,7 +24,6 @@ def get_prices():
 
 
 def client(COINBASE_API_KEY,COINBASE_API_SECRET):
-    from coinbase.wallet.client import Client
     return Client(COINBASE_API_KEY,
                   COINBASE_API_SECRET)
 
@@ -35,17 +37,17 @@ def account(client,currency):
 def send(client,to,amount,currency):
     acc = account(client,currency)
     try:
-      tx = account.send_money(to=to, amount=amount,currency=currency)
+      return acc.send_money(to=to, amount=amount,currency=currency)
     except TwoFactorRequiredError:
       # Show 2FA dialog to user and collect 2FA token
       # two_factor_token = ...
       # Re-try call with the `two_factor_token` parameter
       # tx = account.send_money(to=to, amount='1', currency='BTC', two_factor_token="123456")
-      print("Doesn't support 2FA right now!")
-    print tx
+      raise UserWarning("Doesn't support 2FA right now!")
+    except APIError as e:
+        raise UserWarning(e.message)
 
 def tx(client,tx_id):
-    from coinbase.wallet.error import APIError
     accounts = client.get_accounts()["data"]
     for account in accounts:
         try:

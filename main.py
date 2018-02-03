@@ -68,7 +68,7 @@ def hello(fr):
 def handle_send_from(text):
     (exchange,amount,currency) = formatting.parse_send_message(text)
     if exchange == "coinbase":
-        tx = send_coinbase_coindelta(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET,amount,currency)
+        tx = trade.send_coinbase_coindelta(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET,amount,currency)
         return "Transaction committed: %s" % tx.id
     else:
         return "Unknown exchange: %s" % exchange
@@ -137,22 +137,22 @@ class WebhookHandler(webapp2.RequestHandler):
                     reply(handle_send_from(text))
                 else:
                     reply('What command?')
-        except UserWarning as e:
-            reply(e)
 
-        # CUSTOMIZE FROM HERE
-
-        elif 'who are you' in text:
-            reply('telebot starter kit, created by yukuku: https://github.com/yukuku/telebot')
-        elif 'what time' in text:
-            reply('look at the corner of your screen!')
-        else:
-            if getEnabled(chat_id):
-                reply('I got your message! (but I do not know how to answer)')
+            # CUSTOMIZE FROM HERE
+            elif 'who are you' in text:
+                reply('telebot starter kit, created by yukuku: https://github.com/yukuku/telebot')
+            elif 'what time' in text:
+                reply('look at the corner of your screen!')
             else:
-                logging.info('not enabled for chat_id {}'.format(chat_id))
+                if getEnabled(chat_id):
+                    reply('I got your message! (but I do not know how to answer)')
+                else:
+                    logging.info('not enabled for chat_id {}'.format(chat_id))
 
-
+        except UserWarning as e:
+            print e
+            reply(str(e))
+ 
 app = webapp2.WSGIApplication([
     ('/me', MeHandler),
     ('/updates', GetUpdatesHandler),

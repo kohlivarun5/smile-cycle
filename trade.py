@@ -57,3 +57,8 @@ class TestCoinbase(unittest.TestCase):
 class TestSendCoinbaseCoindelta(unittest.TestCase):
     def test_bad_ccy(self):
         self.assertRaises(UserWarning,send_coinbase_coindelta,credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET,1,"")
+
+    def test_zero_amount(self):
+        client = coinbase_api.client(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET)
+        self.assertRaises(UserWarning,send_coinbase_coindelta,credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET,0,"ETH")
+

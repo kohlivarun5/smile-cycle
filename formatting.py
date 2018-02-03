@@ -35,7 +35,7 @@ def parse_send_message(text):
     assert (3 == len(tokens))
     exchange = tokens[0].lower()
     amount = float(tokens[1])
-    assert (amount > 0)
+    assert (amount >= 0)
     currency = tokens[2].upper()
     return (exchange,amount,currency) 
 
