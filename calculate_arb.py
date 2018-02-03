@@ -92,7 +92,5 @@ class TestCalcs(unittest.TestCase):
         arbs = binance_kucoin()
         if len(arbs) != 0:
             for arb in arbs:
-                #self.assertEqual("coinbase",arb["from"])
-                #self.assertEqual("coindelta",arb["to"])
                 self.assertLessEqual(3,len(arb["coin"]))
                 self.assertEqual("float",type(arb["gain_perc"]).__name__)
