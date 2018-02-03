@@ -36,3 +36,12 @@ def send(client,to,amount,currency):
       # tx = account.send_money(to=to, amount='1', currency='BTC', two_factor_token="123456")
       print("Doesn't support 2FA right now!")
     print tx
+
+def tx(client,tx_id):
+    from coinbase.wallet.error import APIError
+    accounts = client.get_accounts()["data"]
+    for account in accounts:
+        try:
+            return account.get_transaction(tx_id)
+        except APIError:
+            pass

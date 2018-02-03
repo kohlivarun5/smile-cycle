@@ -9,11 +9,11 @@ Each function returns the results in  a dict containing:
 """
 
 from exchanges import coindelta
-from exchanges import coinbase
+from exchanges import coinbase_api
 from exchanges import forex
 def coinbase_coindelta():
     prices = {}
-    prices['coinbase'] = coinbase.get_prices()
+    prices['coinbase'] = coinbase_api.get_prices()
     prices['coindelta'] = coindelta.get_prices()
     prices['forex'] = forex.get_prices()
     result = []
