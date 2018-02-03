@@ -33,6 +33,8 @@ def account(client,currency):
     return None
 
 def send(client,to,amount,currency):
+    if acc == None:
+        return None
     acc = account(client,currency)
     try:
       tx = account.send_money(to=to, amount=amount,currency=currency)

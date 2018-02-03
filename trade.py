@@ -1,7 +1,10 @@
 from exchanges import coinbase_api,coindelta
 def send_coinbase_coindelta(COINBASE_API_KEY,COINBASE_API_SECRET,amount,currency):
-    cb_client = coinbase_api.client(COINBASE_API_KEY,COINBASE_API_SECRET)
-    coinbase_api.send(client,coindelta.ADDRESSES["currency"],amount,currency)
+    client = coinbase_api.client(COINBASE_API_KEY,COINBASE_API_SECRET)
+    to = coindelta.ADDRESSES.get(currency)
+    if to:
+        tx = coinbase_api.send(client,to,amount,currency)
+        return tx
 
 
 """
@@ -66,6 +69,12 @@ class TestCoinbase(unittest.TestCase):
         self.assertEqual("send",transaction.type)
         self.assertEqual("confirmed",transaction.network.status)
 
+    def test_tx_bad(self):
+        client = coinbase_api.client(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET)
+        tx_id = ""
+        transaction = coinbase_api.tx(client,tx_id)
+        self.assertEqual(None,transaction)
+
     def test_all(self):
         client = coinbase_api.client(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET)
         # print(user)
@@ -80,3 +89,9 @@ class TestCoinbase(unittest.TestCase):
             #print(client.get_addresses(account.id))
             #client.get_address(account_id, address_id)
         # client.get_transaction(account_id, transaction_id)
+
+
+class TestSendCoinbaseCoindelta(unittest.TestCase):
+    def test_bad_ccy(self):
+        tx = send_coinbase_coindelta(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET,1,"")
+        self.assertEqual(None,tx)
