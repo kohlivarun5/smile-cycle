@@ -66,7 +66,7 @@ def hello(fr):
     return "Hello %s!\nID:%s" % (fr.get("first_name"),fr.get('id'))
 
 def handle_send_from(text):
-    (exchange,amount,currency) = trade.parse_send_message(text)
+    (exchange,amount,currency) = formatting.parse_send_message(text)
     if exchange == "coinbase":
         tx = send_coinbase_coindelta(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET,amount,currency)
         return "Transaction committed: %s" % tx.id
@@ -120,22 +120,25 @@ class WebhookHandler(webapp2.RequestHandler):
             logging.info('send response:')
             logging.info(resp)
 
-        if text.startswith('/'):
-            if text == '/start':
-                reply('Bot enabled')
-                setEnabled(chat_id, True)
-            elif text == '/stop':
-                reply('Bot disabled')
-                setEnabled(chat_id, False)
-            elif text.startswith('/hello'):
-                reply(hello(fr))
-            elif text.startswith('/arb'):
-                reply(formatting.text_of_arbs(calculate_arb.coinbase_coindelta()))
-                reply(formatting.text_of_arbs(calculate_arb.binance_kucoin()))
-            elif text.startswith('/send_from'):
-                reply(handle_send_from(text))
-            else:
-                reply('What command?')
+        try:
+            if text.startswith('/'):
+                if text == '/start':
+                    reply('Bot enabled')
+                    setEnabled(chat_id, True)
+                elif text == '/stop':
+                    reply('Bot disabled')
+                    setEnabled(chat_id, False)
+                elif text.startswith('/hello'):
+                    reply(hello(fr))
+                elif text.startswith('/arb'):
+                    reply(formatting.text_of_arbs(calculate_arb.coinbase_coindelta()))
+                    reply(formatting.text_of_arbs(calculate_arb.binance_kucoin()))
+                elif text.startswith('/send_from'):
+                    reply(handle_send_from(text))
+                else:
+                    reply('What command?')
+        except UserWarning as e:
+            reply(e)
 
         # CUSTOMIZE FROM HERE
 

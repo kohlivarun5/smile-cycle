@@ -30,11 +30,9 @@ def account(client,currency):
     for account in accounts:
         if account.balance.currency == currency:
             return account
-    return None
+    raise UserWarning("No account for currency:%s" % currency)
 
 def send(client,to,amount,currency):
-    if acc == None:
-        return None
     acc = account(client,currency)
     try:
       tx = account.send_money(to=to, amount=amount,currency=currency)
@@ -53,4 +51,6 @@ def tx(client,tx_id):
         try:
             return account.get_transaction(tx_id)
         except APIError:
-            pass
+            pass 
+    raise UserWarning("No transaction for id:%s" % tx_id)
+
