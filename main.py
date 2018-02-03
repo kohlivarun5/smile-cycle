@@ -66,12 +66,15 @@ def hello(fr):
     return "Hello %s!\nID:%s" % (fr.get("first_name"),fr.get('id'))
 
 def handle_send_from(exchange,text):
-    (amount,currency) = formatting.parse_send_message(text)
-    if exchange == "coinbase":
-        tx_text = trade.send_coinbase_coindelta(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET,amount,currency)
-        return tx_text
-    else:
-        raise UserWarning("Unknown exchange: %s" % exchange)
+    try:
+        (amount,currency) = formatting.parse_send_message(text)
+        if exchange == "coinbase":
+            tx_text = trade.send_coinbase_coindelta(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET,amount,currency)
+            return tx_text
+        else:
+            raise UserWarning("Unknown exchange: %s" % exchange)
+    except:
+        return "Unknown error occured!"
 
 def get_tx_info(text,reply_to_text):
     if reply_to_text is None:
@@ -150,7 +153,10 @@ class WebhookHandler(webapp2.RequestHandler):
                     reply(formatting.text_of_arbs(calculate_arb.coinbase_coindelta()))
                     reply(formatting.text_of_arbs(calculate_arb.binance_kucoin()))
                 elif text.startswith('/send_from_coinbase'):
-                    reply(handle_send_from("coinbase",text))
+                    if 529093774 == fr.get('id'):
+                        reply(handle_send_from("coinbase",text))
+                    else:
+                        reply("You are not allowed to initiate send from coinbase")
                 elif text.startswith('/tx_info'):
                     reply(get_tx_info(text,reply_to_text))
                 else:
