@@ -153,7 +153,7 @@ class WebhookHandler(webapp2.RequestHandler):
                     reply(formatting.text_of_arbs(calculate_arb.coinbase_coindelta()))
                     reply(formatting.text_of_arbs(calculate_arb.binance_kucoin()))
                 elif text.startswith('/send_from_coinbase'):
-                    if 529093774 == fr.get('id'):
+                    if credentials.ID_VARUN_KOHLI == fr.get('id'):
                         reply(handle_send_from("coinbase",text))
                     else:
                         reply("You are not allowed to initiate send from coinbase")
