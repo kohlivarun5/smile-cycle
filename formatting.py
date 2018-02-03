@@ -25,7 +25,7 @@ def text_of_arbs(arbs_in, default_msg="No arbitrage found!"):
 
 """
 Parse a send command
-/send_from coinbase 1 ETH 
+/send_from 1 ETH 
 """
 def parse_send_message(text):
     tokens = text.split(" ")
