@@ -25,6 +25,11 @@ def client(COINBASE_API_KEY,COINBASE_API_SECRET):
     return Client(COINBASE_API_KEY,
                   COINBASE_API_SECRET)
 
+def account(client,currency):
+    accounts = client.get_accounts()["data"]
+    for account in accounts:
+        pass
+
 def send(client,to,amount,currency):
     account = client.get_primary_account()
     try:

@@ -52,7 +52,7 @@ class TestTrade(unittest.TestCase):
         self.assertEqual("Varun Kohli",user.name)
         # print(user)
         accounts = client.get_accounts()["data"]
-        #print accounts
+        print accounts
         #print(client.get_primary_account())
         for account in accounts:
             for tx in account.get_transactions()["data"]:
