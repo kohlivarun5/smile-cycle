@@ -1,2 +1,4 @@
 webapp2
-coinbase
+coinbase 
+requests
+requests-toolbelt
