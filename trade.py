@@ -33,6 +33,14 @@ def send_coinbase_coindelta(COINBASE_API_KEY,COINBASE_API_SECRET,amount,currency
     logging.info(tx)
     return coinbase_transaction_info(tx)
 
+def get_coinbase_balance(COINBASE_API_KEY,COINBASE_API_SECRET):
+    client = coinbase_api.client(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET)
+    accounts = client.get_accounts()["data"]
+    text = ""
+    for account in accounts:
+        text+="\n%s : %s (*%s%s*)" % (account.balance.currency,account.balance.amount,account.native_balance.amount,account.native_balance.currency)
+    return text
+
 import unittest
 import credentials
 class TestCoinbase(unittest.TestCase):
@@ -72,6 +80,11 @@ class TestCoinbase(unittest.TestCase):
     def test_tx_bad(self):
         client = coinbase_api.client(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET)
         self.assertRaises(UserWarning,coinbase_api.tx,client,"")
+
+    def test_get_balance(self):
+        text = get_coinbase_balance(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET)
+        #print text
+        self.assertLess(0,len(text))
 
     def test_all(self):
         client = coinbase_api.client(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET)
