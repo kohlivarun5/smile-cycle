@@ -60,11 +60,29 @@ class SetWebhookHandler(webapp2.RequestHandler):
             self.response.write(json.dumps(json.load(urllib2.urlopen(BASE_URL + 'setWebhook', urllib.urlencode({'url': url})))))
 
 
+
+import calculate_arb,formatting,trade
 def hello(fr):
     return "Hello %s!\nID:%s" % (fr.get("first_name"),fr.get('id'))
 
-import calculate_arb
-import formatting
+def handle_send_from(exchange,text):
+    (amount,currency) = formatting.parse_send_message(text)
+    if exchange == "coinbase":
+        tx_text = trade.send_coinbase_coindelta(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET,amount,currency)
+        return tx_text
+    else:
+        raise UserWarning("Unknown exchange: %s" % exchange)
+
+def get_tx_info(text,reply_to_text):
+    if reply_to_text is None:
+        return "Reply to a transaction message to get it's info!"
+    from exchanges import coinbase_api
+    # First parse to find transaction id 
+    id = trade.parse_coinbase_transaction_id(reply_to_text)
+    client = coinbase_api.client(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET)
+    transaction = coinbase_api.tx(client,id)
+    return trade.coinbase_transaction_info(transaction)
+
 
 class WebhookHandler(webapp2.RequestHandler):
     def post(self):
@@ -85,6 +103,11 @@ class WebhookHandler(webapp2.RequestHandler):
         fr = message.get('from')
         chat = message['chat']
         chat_id = chat['id']
+
+        reply_to_text = None 
+        reply_to_message = message.get("reply_to_message")
+        if reply_to_message:
+            reply_to_text = reply_to_message.get("text")
 
         if not text:
             logging.info('no text')
@@ -113,34 +136,50 @@ class WebhookHandler(webapp2.RequestHandler):
             logging.info('send response:')
             logging.info(resp)
 
-        if text.startswith('/'):
-            if text == '/start':
-                reply('Bot enabled')
-                setEnabled(chat_id, True)
-            elif text == '/stop':
-                reply('Bot disabled')
-                setEnabled(chat_id, False)
-            elif text.startswith('/hello'):
-                reply(hello(fr))
-            elif text.startswith('/arb'):
-                reply(formatting.text_of_arbs(calculate_arb.coinbase_coindelta()))
-                reply(formatting.text_of_arbs(calculate_arb.binance_kucoin()))
+        try:
+            if text.startswith('/'):
+                if text == '/start':
+                    reply('Bot enabled')
+                    setEnabled(chat_id, True)
+                elif text == '/stop':
+                    reply('Bot disabled')
+                    setEnabled(chat_id, False)
+                elif text.startswith('/hello'):
+                    reply(hello(fr))
+                elif text.startswith('/arb'):
+                    reply(formatting.text_of_arbs(calculate_arb.coinbase_coindelta()))
+                    reply(formatting.text_of_arbs(calculate_arb.binance_kucoin()))
+                elif text.startswith('/send_from_coinbase'):
+                    if credentials.ID_VARUN_KOHLI == fr.get('id'):
+                        reply(handle_send_from("coinbase",text))
+                    else:
+                        reply("You are not allowed to initiate send from coinbase")
+                elif text.startswith('/tx_info'):
+                    reply(get_tx_info(text,reply_to_text))
+                else:
+                    reply('What command?')
+
+            # CUSTOMIZE FROM HERE
+            elif 'who are you' in text:
+                reply('telebot starter kit, created by yukuku: https://github.com/yukuku/telebot')
+            elif 'what time' in text:
+                reply('look at the corner of your screen!')
             else:
-                reply('What command?')
+                if getEnabled(chat_id):
+                    reply('I got your message! (but I do not know how to answer)')
+                else:
+                    logging.info('not enabled for chat_id {}'.format(chat_id))
 
-        # CUSTOMIZE FROM HERE
-
-        elif 'who are you' in text:
-            reply('telebot starter kit, created by yukuku: https://github.com/yukuku/telebot')
-        elif 'what time' in text:
-            reply('look at the corner of your screen!')
-        else:
-            if getEnabled(chat_id):
-                reply('I got your message! (but I do not know how to answer)')
-            else:
-                logging.info('not enabled for chat_id {}'.format(chat_id))
-
-
+        except UserWarning as e:
+            #print e
+            reply(str(e))
+        except Exception as e:
+            logging.exception(e,exc_info=True)
+            reply("Unknown error!")
+        except:
+            logging.error("Unknown error")
+            reply("Unknown error!")
+ 
 app = webapp2.WSGIApplication([
     ('/me', MeHandler),
     ('/updates', GetUpdatesHandler),
