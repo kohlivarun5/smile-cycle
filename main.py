@@ -66,15 +66,12 @@ def hello(fr):
     return "Hello %s!\nID:%s" % (fr.get("first_name"),fr.get('id'))
 
 def handle_send_from(exchange,text):
-    try:
-        (amount,currency) = formatting.parse_send_message(text)
-        if exchange == "coinbase":
-            tx_text = trade.send_coinbase_coindelta(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET,amount,currency)
-            return tx_text
-        else:
-            raise UserWarning("Unknown exchange: %s" % exchange)
-    except:
-        return "Unknown error occured!"
+    (amount,currency) = formatting.parse_send_message(text)
+    if exchange == "coinbase":
+        tx_text = trade.send_coinbase_coindelta(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET,amount,currency)
+        return tx_text
+    else:
+        raise UserWarning("Unknown exchange: %s" % exchange)
 
 def get_tx_info(text,reply_to_text):
     if reply_to_text is None:
@@ -174,8 +171,10 @@ class WebhookHandler(webapp2.RequestHandler):
                     logging.info('not enabled for chat_id {}'.format(chat_id))
 
         except UserWarning as e:
-            print e
+            #print e
             reply(str(e))
+        except:
+            logging.error("Unknown error")
  
 app = webapp2.WSGIApplication([
     ('/me', MeHandler),
