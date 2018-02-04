@@ -153,7 +153,7 @@ class WebhookHandler(webapp2.RequestHandler):
                         reply(handle_send_from("coinbase",text))
                     else:
                         reply("You are not allowed to initiate send from coinbase")
-                elif text.startswith('/balance_coinbase'):
+                elif text.startswith('/coinbase_balance'):
                     reply(trade.get_coinbase_balance(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET))
                 elif text.startswith('/tx_info'):
                     reply(get_tx_info(text,reply_to_text))
