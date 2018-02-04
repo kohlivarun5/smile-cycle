@@ -173,8 +173,12 @@ class WebhookHandler(webapp2.RequestHandler):
         except UserWarning as e:
             #print e
             reply(str(e))
+        except Exception as e:
+            logging.exception(e,exc_info=True)
+            reply("Unknown error!")
         except:
             logging.error("Unknown error")
+            reply("Unknown error!")
  
 app = webapp2.WSGIApplication([
     ('/me', MeHandler),
