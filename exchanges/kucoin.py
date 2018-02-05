@@ -15,7 +15,9 @@ def get_prices():
     tmp = market['symbol']
     cur = tmp.split('-')[0].lower()
     cur1 = tmp.split('-')[1].lower()
-    if 'buy' in market.keys():
-      prices['bid'][cur + "_" + cur1] = float(market['buy'])
-      prices['ask'][cur + "_" + cur1] = float(market['sell'])
+    buy = market.get('buy')
+    sell = market.get('sell')
+    if buy and sell:
+      prices['bid'][cur + "_" + cur1] = float(buy)
+      prices['ask'][cur + "_" + cur1] = float(sell)
   return prices

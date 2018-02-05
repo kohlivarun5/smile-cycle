@@ -83,7 +83,6 @@ def get_tx_info(text,reply_to_text):
     transaction = coinbase_api.tx(client,id)
     return trade.coinbase_transaction_info(transaction)
 
-
 class WebhookHandler(webapp2.RequestHandler):
     def post(self):
         urlfetch.set_default_fetch_deadline(60)
@@ -154,6 +153,8 @@ class WebhookHandler(webapp2.RequestHandler):
                         reply(handle_send_from("coinbase",text))
                     else:
                         reply("You are not allowed to initiate send from coinbase")
+                elif text.startswith('/coinbase_balance'):
+                    reply(trade.get_coinbase_balance(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET))
                 elif text.startswith('/tx_info'):
                     reply(get_tx_info(text,reply_to_text))
                 else:
