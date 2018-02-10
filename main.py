@@ -98,7 +98,7 @@ def replyToTelegram(msg,chat_id,message_id):
     logging.info('send response:')
     logging.info(resp)
 
-def enqueueTxTask(tx,chat_id,message_id,max_count=30,count=0,countdown=60):
+def enqueueTxTask(tx,chat_id,message_id,max_count=60,count=0,countdown=60):
     if tx.network.status == "confirmed" and tx.network.confirmations >= 10 and count > 0:
         return
 
@@ -111,6 +111,7 @@ def enqueueTxTask(tx,chat_id,message_id,max_count=30,count=0,countdown=60):
 def get_tx_info_task(tx_id,chat_id,message_id,max_count,count,countdown):
     if count >= max_count:
         logging.info("Reached max count for task")
+        replyToTelegram("Reached max count for task. Request status manually now!",chat_id,message_id)
         return 
 
     transaction = get_transaction(tx_id)
