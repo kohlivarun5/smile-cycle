@@ -68,8 +68,7 @@ def hello(fr):
 def handle_send_from(exchange,text):
     (amount,currency) = formatting.parse_send_message(text)
     if exchange == "coinbase":
-        tx = trade.send_coinbase_coindelta(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET,amount,currency)
-        return tx 
+        return trade.send_coinbase_coindelta(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET,amount,currency)
     else:
         raise UserWarning("Unknown exchange: %s" % exchange)
 
