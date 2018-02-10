@@ -13,14 +13,15 @@ def parse_coinbase_transaction_id(text):
 def coinbase_transaction_info(tx):
     text = ""
     text +="%s%s" % (COINBASE_TRANSACTION_ID_BASE,tx.id)
-    text +="\nAmount: %s%s" % (tx.network.transaction_amount.amount,tx.network.transaction_amount.currency)
-    text +="\nFees: %s%s" % (tx.network.transaction_fee.amount,tx.network.transaction_fee.currency)
-    text +="\nTotal Cost: *%s%s*" % (tx.native_amount.amount,tx.native_amount.currency)
-    text +="\n\nNetwork:"
     if tx.network.status == "confirmed":
-        text +="\nHash: %s" % tx.network.hash
-        text +="\nConfirmations: %d" % tx.network.confirmations
-    text +="\nStatus: *%s*" % tx.network.status.title()
+        #text +="\nHash: %s" % tx.network.hash
+        text +="\n*Confirmations: %d*" % tx.network.confirmations
+    else:
+        text +="\nStatus: *%s*" % tx.network.status.title()
+
+    text +="\n\nTotal Cost: *%s%s*" % (tx.native_amount.amount,tx.native_amount.currency)
+    text +="\nAmount: %s%s" % (tx.network.transaction_amount.amount,tx.network.transaction_amount.currency)
+    #text +="\nFees: %s%s" % (tx.network.transaction_fee.amount,tx.network.transaction_fee.currency)
     return text 
 
 def send_coinbase_coindelta(COINBASE_API_KEY,COINBASE_API_SECRET,amount,currency):
@@ -31,7 +32,7 @@ def send_coinbase_coindelta(COINBASE_API_KEY,COINBASE_API_SECRET,amount,currency
     tx = coinbase_api.send(client,to,amount,currency)
     print(tx)
     logging.info(tx)
-    return coinbase_transaction_info(tx)
+    return tx
 
 def get_coinbase_balance(COINBASE_API_KEY,COINBASE_API_SECRET):
     client = coinbase_api.client(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET)

@@ -1,6 +1,7 @@
 runtime: python27
 api_version: 1
 threadsafe: yes
+service: main
 
 handlers:
 - url: /favicon\.ico
@@ -20,4 +21,7 @@ libraries:
 - name: pycrypto
   version: "latest"
 - name: ssl
-  version: latest
+  version: latest 
+
+builtins:
+- deferred: on
