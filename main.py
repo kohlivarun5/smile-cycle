@@ -98,8 +98,13 @@ def replyToTelegram(msg,chat_id,message_id):
     logging.info('send response:')
     logging.info(resp)
 
-def enqueueTxTask(tx,chat_id,message_id,max_count=60,count=0,countdown=60):
-    if tx.network.status == "confirmed" and tx.network.confirmations >= 10 and count > 0:
+def enqueueTxTask(tx,chat_id,message_id,max_count=60,count=0,countdown=120):
+    from exchanges import coindelta
+    target_confirmations = coindelta.CONFIRMATIONS.get(tx["to"]["currency"])
+    if target_confirmations is None:
+        target_confirmations = 10
+
+    if tx.network.status == "confirmed" and tx.network.confirmations >= target_confirmations and count > 0:
         return
 
     if count > max_count:
