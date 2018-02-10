@@ -168,9 +168,12 @@ class WebhookHandler(webapp2.RequestHandler):
                     setEnabled(chat_id, False)
                 elif text.startswith('/hello'):
                     reply(hello(fr))
+                elif text.startswith('/arb_koinex'):
+                    reply(formatting.text_of_arbs(calculate_arb.coinbase_koinex()))
+                elif text.startswith('/arb_crypto'):
+                    reply(formatting.text_of_arbs(calculate_arb.binance_kucoin()))
                 elif text.startswith('/arb'):
                     reply(formatting.text_of_arbs(calculate_arb.coinbase_coindelta()))
-                    reply(formatting.text_of_arbs(calculate_arb.binance_kucoin()))
                 elif text.startswith('/send_from_coinbase'):
                     if credentials.ID_VARUN_KOHLI == fr.get('id'):
                         tx = handle_send_from("coinbase",text)
