@@ -68,10 +68,15 @@ def hello(fr):
 def handle_send_from(exchange,text):
     (amount,currency) = formatting.parse_send_message(text)
     if exchange == "coinbase":
-        tx_text = trade.send_coinbase_coindelta(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET,amount,currency)
-        return tx_text
+        return trade.send_coinbase_coindelta(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET,amount,currency)
     else:
         raise UserWarning("Unknown exchange: %s" % exchange)
+
+def get_transaction(id):
+    from exchanges import coinbase_api
+    client = coinbase_api.client(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET)
+    transaction = coinbase_api.tx(client,id)
+    return transaction
 
 def get_tx_info(text,reply_to_text):
     if reply_to_text is None:
@@ -79,9 +84,42 @@ def get_tx_info(text,reply_to_text):
     from exchanges import coinbase_api
     # First parse to find transaction id 
     id = trade.parse_coinbase_transaction_id(reply_to_text)
-    client = coinbase_api.client(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET)
-    transaction = coinbase_api.tx(client,id)
-    return trade.coinbase_transaction_info(transaction)
+    tx = get_transaction(id)
+    return trade.coinbase_transaction_info(tx)
+
+def replyToTelegram(msg,chat_id,message_id):
+    resp = urllib2.urlopen(BASE_URL + 'sendMessage', urllib.urlencode({
+        'chat_id': str(chat_id),
+        'text': msg.encode('utf-8'),
+        'parse_mode' : 'Markdown',
+        'disable_web_page_preview': 'true',
+        'reply_to_message_id': str(message_id),
+    }), timeout = 30).read()
+    logging.info('send response:')
+    logging.info(resp)
+
+def enqueueTxTask(tx,chat_id,message_id,max_count=60,count=0,countdown=60):
+    if tx.network.status == "confirmed" and tx.network.confirmations >= 10 and count > 0:
+        return
+
+    if count > max_count:
+        return
+
+    from google.appengine.ext import deferred
+    deferred.defer(get_tx_info_task, tx.id,chat_id,message_id,max_count,count,countdown,_countdown=countdown)
+
+def get_tx_info_task(tx_id,chat_id,message_id,max_count,count,countdown):
+    if count >= max_count:
+        logging.info("Reached max count for task")
+        replyToTelegram("Reached max count for task. Request status manually now!",chat_id,message_id)
+        return 
+
+    transaction = get_transaction(tx_id)
+    if transaction:
+        msg = trade.coinbase_transaction_info(transaction)
+        replyToTelegram(msg,chat_id,message_id)
+        enqueueTxTask(transaction,chat_id,message_id,max_count,count=count+1,countdown=countdown)
+
 
 class WebhookHandler(webapp2.RequestHandler):
     def post(self):
@@ -112,28 +150,8 @@ class WebhookHandler(webapp2.RequestHandler):
             logging.info('no text')
             return
 
-        def reply(msg=None, img=None):
-            if msg:
-                resp = urllib2.urlopen(BASE_URL + 'sendMessage', urllib.urlencode({
-                    'chat_id': str(chat_id),
-                    'text': msg.encode('utf-8'),
-                    'parse_mode' : 'Markdown',
-                    'disable_web_page_preview': 'true',
-                    'reply_to_message_id': str(message_id),
-                })).read()
-            elif img:
-                resp = multipart.post_multipart(BASE_URL + 'sendPhoto', [
-                    ('chat_id', str(chat_id)),
-                    ('reply_to_message_id', str(message_id)),
-                ], [
-                    ('photo', 'image.jpg', img),
-                ])
-            else:
-                logging.error('no msg or img specified')
-                resp = None
-
-            logging.info('send response:')
-            logging.info(resp)
+        def reply(msg):
+            return replyToTelegram(msg,chat_id,message_id)
 
         try:
             if text.startswith('/'):
@@ -150,13 +168,19 @@ class WebhookHandler(webapp2.RequestHandler):
                     reply(formatting.text_of_arbs(calculate_arb.binance_kucoin()))
                 elif text.startswith('/send_from_coinbase'):
                     if credentials.ID_VARUN_KOHLI == fr.get('id'):
-                        reply(handle_send_from("coinbase",text))
+                        tx = handle_send_from("coinbase",text)
+                        tx_text = trade.coinbase_transaction_info(tx)
+                        reply(tx_text)
+                        enqueueTxTask(tx,chat_id,message_id)
                     else:
                         reply("You are not allowed to initiate send from coinbase")
                 elif text.startswith('/coinbase_balance'):
                     reply(trade.get_coinbase_balance(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET))
                 elif text.startswith('/tx_info'):
                     reply(get_tx_info(text,reply_to_text))
+                elif text.startswith('/enqueueTxTask'):
+                    tx = get_transaction(text.split(' ')[1])
+                    enqueueTxTask(tx,chat_id,message_id,max_count=3,countdown=5)
                 else:
                     reply('What command?')
 
