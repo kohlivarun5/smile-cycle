@@ -108,8 +108,8 @@ import unittest
 class TestCalcs(unittest.TestCase):
     def test_coinbase_coindelta(self):
         arbs = coinbase_coindelta()
-        import formatting
-        print(formatting.text_of_arbs(arbs))
+        #import formatting
+        #print(formatting.text_of_arbs(arbs))
         if len(arbs) != 0:
             for arb in arbs:
                 self.assertEqual("coinbase",arb["from"])
@@ -126,8 +126,8 @@ class TestCalcs(unittest.TestCase):
 
     def test_coinbase_koinex(self):
         arbs = coinbase_koinex()
-        import formatting
-        print(formatting.text_of_arbs(arbs))
+        #import formatting
+        #print(formatting.text_of_arbs(arbs))
         if len(arbs) != 0:
             for arb in arbs:
                 self.assertEqual("coinbase",arb["from"])
