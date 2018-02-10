@@ -99,7 +99,7 @@ def replyToTelegram(msg,chat_id,message_id):
     logging.info(resp)
 
 def enqueueTxTask(tx,chat_id,message_id,max_count=30,count=0,countdown=60):
-    if tx.network.status == "confirmed" and tx.network.confirmations > 10 and count > 0:
+    if tx.network.status == "confirmed" and tx.network.confirmations >= 10 and count > 0:
         return
 
     if count > max_count:
