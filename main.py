@@ -110,7 +110,7 @@ def enqueueTxTask(tx,chat_id,message_id,max_count=30,count=0,countdown=60):
 
 def get_tx_info_task(tx_id,chat_id,message_id,max_count,count,countdown):
     if count >= max_count:
-        logging.log("Reached max count for task")
+        logging.info("Reached max count for task")
         return 
 
     transaction = get_transaction(tx_id)
