@@ -1,16 +1,17 @@
-import commands
+import urllib2
 import json
+
+def query():
+  url = "https://koinex.in/api/ticker"
+  response = urllib2.urlopen(url, timeout = 5)
+  return json.load(response)
+
 
 def get_prices(download=1):
   prices = {}
   prices['bid'] = {}
   prices['ask'] = {}
-  if (download > 0):
-    commands.getoutput("wget -O koinex https://koinex.in/api/ticker")
-  file="koinex"
-  with open(file, 'r') as conf:
-    koinex = json.load(conf)
-
+  koinex = query()
   for prod in koinex['stats'].keys():
     market = koinex['stats'][prod]
     prices['bid'][prod.lower() + "_inr"] = float(market['highest_bid'])
