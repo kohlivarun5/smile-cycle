@@ -20,10 +20,12 @@ def get_prices():
 
 ADDRESSES = {
     "ETH" : "0xA0fCE563cA8cAB01ef12fd2d7a1f193E37a982d2",
-    "LTC" : "LYzTCSzfCXaVVpvB5qTx7Xqz4qU7VYyVwf"
+    "LTC" : "LYzTCSzfCXaVVpvB5qTx7Xqz4qU7VYyVwf",
+    "BCH" : "1LNa5YsrxFb4tjvX9usq6un4bWZEY3CFWz"
 }
 
 CONFIRMATIONS = {
     "ETH" : 25,
-    "LTC" : 6
+    "LTC" : 6,
+    "BCH" : 3
 }
