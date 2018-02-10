@@ -9,12 +9,39 @@ Each function returns the results in  a dict containing:
 """
 
 from exchanges import coindelta
+from exchanges import koinex
 from exchanges import coinbase_api
 from exchanges import forex
 def coinbase_coindelta():
     prices = {}
     prices['coinbase'] = coinbase_api.get_prices()
     prices['coindelta'] = coindelta.get_prices()
+    prices['forex'] = forex.get_prices()
+    result = []
+
+    for i in prices.keys():
+      for j in prices.keys():
+        if (i == j):
+          continue
+        for cur in prices[i]['bid'].keys():
+          if (cur.split('_')[1] != 'usd'):
+            continue
+          if (cur.split('_')[0] + "_inr" not in prices[j]['bid'].keys()):
+            continue
+          buy_amt = 1000
+          buy = buy_amt/prices[i]['ask'][cur]
+          sell = (buy - 0.001) * prices[j]['bid'][cur.split('_')[0] + "_inr"]
+          buy_flow = buy_amt * prices['forex']['bid']['usd_inr']
+          profit = sell - buy_flow
+          if (profit > 0):
+            result.append({'from' : i, 'to' : j, 'coin' : cur.split('_')[0].upper(), 'gain_perc' : profit*100/buy_flow})
+
+    return result
+
+def coinbase_koinex():
+    prices = {}
+    prices['coinbase'] = coinbase_api.get_prices()
+    prices['koinex'] = koinex.get_prices()
     prices['forex'] = forex.get_prices()
     result = []
 
@@ -81,6 +108,8 @@ import unittest
 class TestCalcs(unittest.TestCase):
     def test_coinbase_coindelta(self):
         arbs = coinbase_coindelta()
+        #import formatting
+        #print(formatting.text_of_arbs(arbs))
         if len(arbs) != 0:
             for arb in arbs:
                 self.assertEqual("coinbase",arb["from"])
@@ -94,3 +123,15 @@ class TestCalcs(unittest.TestCase):
             for arb in arbs:
                 self.assertLessEqual(3,len(arb["coin"]))
                 self.assertEqual("float",type(arb["gain_perc"]).__name__)
+
+    def test_coinbase_koinex(self):
+        arbs = coinbase_koinex()
+        #import formatting
+        #print(formatting.text_of_arbs(arbs))
+        if len(arbs) != 0:
+            for arb in arbs:
+                self.assertEqual("coinbase",arb["from"])
+                self.assertEqual("koinex",arb["to"])
+                self.assertEqual(3,len(arb["coin"]))
+                self.assertEqual("float",type(arb["gain_perc"]).__name__)
+
