@@ -22,3 +22,8 @@ ADDRESSES = {
     "ETH" : "0xA0fCE563cA8cAB01ef12fd2d7a1f193E37a982d2",
     "LTC" : "LYzTCSzfCXaVVpvB5qTx7Xqz4qU7VYyVwf"
 }
+
+CONFIRMATIONS = {
+    "ETH" : 25,
+    "LTC" : 6
+}
