@@ -127,7 +127,7 @@ def get_tx_info_task(tx_id,chat_id,message_id,max_count,count,countdown):
 
 
 SUBSCRIPTION_CHAT_IDS = [
-    529093774,
+    #529093774,
     -255808834
 ]
 class NotifyArbHandler(webapp2.RequestHandler):
