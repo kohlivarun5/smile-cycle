@@ -206,7 +206,9 @@ class WebhookHandler(webapp2.RequestHandler):
                 # Trade commands
                 # Balance
                 elif text.startswith('/coinbase_balance'):
-                    reply(trade.get_coinbase_balance(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET))
+                    reply(trade.get_coinbase_balance(
+                            credentials.COINBASE_API_KEY,
+                            credentials.COINBASE_API_SECRET))
 
                 # Initiate trade
                 elif text.startswith('/send_from_coinbase'):
@@ -237,7 +239,9 @@ class WebhookHandler(webapp2.RequestHandler):
 
                 # Settled in INR
                 elif text.startswith('/sent_to_chase'):
-                    text = trade.save_bank_settlement(chat_id,fr.get('id'),float(text.split(' ')[1]))
+                    text = trade.save_bank_settlement(
+                                    chat_id,fr.get('id'),
+                                    float(text.split(' ')[1]))
                     reply(text)
 
 
@@ -247,11 +251,18 @@ class WebhookHandler(webapp2.RequestHandler):
 
                 # History
                 elif text.startswith('/history'):
-                    (total_cost_usd,total_profit_per_person_usd,text) = trade.tx_list_summary(chat_id)
+                    (total_cost_usd,
+                     total_profit_per_person_usd,
+                     text) = trade.tx_list_summary(chat_id)
                     reply(text)
+
                     (total_amount_usd,text) = trade.bank_settlement_summary(chat_id)
                     reply(text)
-                    text = trade.summary_of_history(total_cost_usd,total_profit_per_person_usd,total_amount_usd)
+
+                    text = trade.summary_of_history(
+                                    total_cost_usd,
+                                    total_profit_per_person_usd,
+                                    total_amount_usd)
                     reply(text)
 
                 elif text.startswith('/enqueueTxTask'):
