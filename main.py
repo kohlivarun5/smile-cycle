@@ -81,11 +81,24 @@ def get_transaction(id):
 def get_tx_info(text,reply_to_text):
     if reply_to_text is None:
         return "Reply to a transaction message to get it's info!"
-    from exchanges import coinbase_api
-    # First parse to find transaction id 
     id = trade.parse_coinbase_transaction_id(reply_to_text)
     tx = get_transaction(id)
     return trade.coinbase_transaction_info(tx)
+
+def save_tx(reply_to_text,chat_id,buyer_id):
+    if reply_to_text is None:
+        return "Reply to a transaction message to get it's info!"
+    tx_id = trade.parse_coinbase_transaction_id(reply_to_text)
+    tx = get_transaction(tx_id)
+    return trade.save_tx(tx,chat_id,buyer_id)
+
+def update_tx(reply_to_text,inr_settlement=None,fees_to_buy_in_usd=None):
+    if reply_to_text is None:
+        return "Reply to a transaction message to get it's info!"
+    tx_id = trade.parse_coinbase_transaction_id(reply_to_text)
+    return trade.update_tx(tx_id,
+                           inr_settlement=inr_settlement,
+                           fees_to_buy_in_usd=fees_to_buy_in_usd)
 
 def replyToTelegram(msg,chat_id,message_id=None):
     resp = urllib2.urlopen(BASE_URL + 'sendMessage', urllib.urlencode({
@@ -177,26 +190,83 @@ class WebhookHandler(webapp2.RequestHandler):
                 elif text == '/stop':
                     reply('Bot disabled')
                     setEnabled(chat_id, False)
+
+                # Info
                 elif text.startswith('/hello'):
                     reply(hello(fr,chat_id))
+
+                # Arb commands
                 elif text.startswith('/arb_koinex'):
                     reply(formatting.text_of_arbs(calculate_arb.coinbase_koinex()))
                 elif text.startswith('/arb_crypto'):
                     reply(formatting.text_of_arbs(calculate_arb.binance_kucoin()))
                 elif text.startswith('/arb'):
                     reply(formatting.text_of_arbs(calculate_arb.coinbase_coindelta()))
+
+                # Trade commands
+                # Balance
+                elif text.startswith('/coinbase_balance'):
+                    reply(trade.get_coinbase_balance(
+                            credentials.COINBASE_API_KEY,
+                            credentials.COINBASE_API_SECRET))
+
+                # Initiate trade
                 elif text.startswith('/send_from_coinbase'):
                     if credentials.ID_VARUN_KOHLI == fr.get('id'):
                         tx = handle_send_from("coinbase",text)
                         tx_text = trade.coinbase_transaction_info(tx)
                         reply(tx_text)
                         enqueueTxTask(tx,chat_id,message_id)
+                        trade.save_tx(tx,chat_id,fr.get('id'))
                     else:
                         reply("You are not allowed to initiate send from coinbase")
-                elif text.startswith('/coinbase_balance'):
-                    reply(trade.get_coinbase_balance(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET))
+
+                # Transaction info
                 elif text.startswith('/tx_info'):
                     reply(get_tx_info(text,reply_to_text))
+
+                # Record extra fees 
+                elif text.startswith('/tx_extra_fees'):
+                    text = update_tx(
+                                reply_to_text,
+                                fees_to_buy_in_usd=float(text.split(' ')[1]))
+                    reply(text)
+
+                # Settled in INR
+                elif text.startswith('/tx_sold_inr'):
+                    text = update_tx(
+                                reply_to_text,
+                                inr_settlement=float(text.split(' ')[1]))
+                    reply(text)
+
+                # Settled in INR
+                elif text.startswith('/sent_to_chase'):
+                    text = trade.save_bank_settlement(
+                                    chat_id,fr.get('id'),
+                                    float(text.split(' ')[1]))
+                    reply(text)
+
+
+                # Helper TX save
+                elif text.startswith('/tx_save'):
+                    reply(save_tx(reply_to_text,chat_id,fr.get('id')))
+
+                # History
+                elif text.startswith('/history'):
+                    (total_cost_usd,
+                     total_profit_per_person_usd,
+                     text) = trade.tx_list_summary(chat_id)
+                    reply(text)
+
+                    (total_amount_usd,text) = trade.bank_settlement_summary(chat_id)
+                    reply(text)
+
+                    text = trade.summary_of_history(
+                                    total_cost_usd,
+                                    total_profit_per_person_usd,
+                                    total_amount_usd)
+                    reply(text)
+
                 elif text.startswith('/enqueueTxTask'):
                     tx = get_transaction(text.split(' ')[1])
                     enqueueTxTask(tx,chat_id,message_id,max_count=3,countdown=5)
