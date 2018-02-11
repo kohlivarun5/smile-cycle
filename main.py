@@ -227,14 +227,16 @@ class WebhookHandler(webapp2.RequestHandler):
 
                 # Record extra fees 
                 elif text.startswith('/tx_extra_fees'):
-                    text = update_tx(reply_to_text,
-                              fees_to_buy_in_usd=float(text.split(' ')[1]))
+                    text = update_tx(
+                                reply_to_text,
+                                fees_to_buy_in_usd=float(text.split(' ')[1]))
                     reply(text)
 
                 # Settled in INR
                 elif text.startswith('/tx_sold_inr'):
-                    text = update_tx(reply_to_text,
-                              inr_settlement=float(text.split(' ')[1]))
+                    text = update_tx(
+                                reply_to_text,
+                                inr_settlement=float(text.split(' ')[1]))
                     reply(text)
 
                 # Settled in INR
