@@ -211,17 +211,16 @@ class WebhookHandler(webapp2.RequestHandler):
                     reply(trade.get_coinbase_balance(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET))
                 elif text.startswith('/tx_info'):
                     reply(get_tx_info(text,reply_to_text))
-                elif text.startswith('/tx_save'):
-                    save_tx(reply_to_text,chat_id,fr.get('id'))
-                    reply('Saved')
                 elif text.startswith('/tx_save_fees_to_buy_in_usd'):
-                    update_tx(reply_to_text,
+                    text = update_tx(reply_to_text,
                               fees_to_buy_in_usd=float(text.split(' ')[1]))
-                    reply('Saved')
+                    reply(text)
                 elif text.startswith('/tx_save_inr_settlement'):
-                    update_tx(reply_to_text,
+                    text = update_tx(reply_to_text,
                               inr_settlement=float(text.split(' ')[1]))
-                    reply('Saved')
+                    reply(text)
+                elif text.startswith('/tx_save'):
+                    replY(save_tx(reply_to_text,chat_id,fr.get('id')))
                 elif text.startswith('/tx_list'):
                     text = trade.tx_list_summary(chat_id)
                     reply(text)

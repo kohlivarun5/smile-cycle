@@ -24,19 +24,18 @@ def coinbase_transaction_info(tx):
     #text +="\nFees: %s%s" % (tx.network.transaction_fee.amount,tx.network.transaction_fee.currency)
     return text 
 
+from exchanges import forex
 from datastore.CoinbaseCoindeltaTransaction import CoinbaseCoindeltaTransaction
 def save_tx(tx,chat_id,buyer_id):
-    try:
-        forex = forex.get_prices()['bid']['usd_inr']
-    except:
-        forex = 0.
+    fx = forex.get_prices()['bid']['usd_inr']
     key = CoinbaseCoindeltaTransaction(chat_id=chat_id,
                                        tx_id=tx.id,
                                        buyer_id=buyer_id,
                                        cost_in_usd=float(tx.native_amount.amount),
-                                       forex_rate_inr_in_usd=float(forex),
+                                       forex_rate_inr_in_usd=float(fx),
                                        id=tx.id)
-    return key.put()
+    key.put()
+    return "Done"
 
 def update_tx(tx_id,inr_settlement=None,fees_to_buy_in_usd=None):
     db_tx = CoinbaseCoindeltaTransaction.get_by_id(tx_id)
@@ -44,31 +43,26 @@ def update_tx(tx_id,inr_settlement=None,fees_to_buy_in_usd=None):
         db_tx.inr_settlement = inr_settlement
     if fees_to_buy_in_usd:
         db_tx.fees_to_buy_in_usd=fees_to_buy_in_usd
-    return db_tx.put()
+    db_tx.put()
+    return "Done"
 
 def tx_list_summary(chat_id):
     query = CoinbaseCoindeltaTransaction.query(
                 CoinbaseCoindeltaTransaction.chat_id == chat_id)
     
-    text = "`Cost($)` | `Made(Rs)` | `%(pp)`|"
+    text = "`Cost($)` | `Made(Rs)` | `%(pp)  `|"
+    total_cost_usd = 0
     for tx in query:
-        if tx.inr_settlement:
-            inr_settlement = "%.4g" % tx.inr_settlement
-            inr_settlement = inr_settlement.ljust(8)
-        else:
-            inr_settlement = " - "
-            inr_settlement = inr_settlement.center(8)
+        inr_settlement = "%.4g" % tx.inr_settlement
+        inr_settlement = inr_settlement.ljust(8)
 
+        total_cost_usd += tx.cost_in_usd
         usd_cost = "%.4g" % (tx.cost_in_usd * -1)
         usd_cost = usd_cost.ljust(7)
 
-        if tx.inr_settlement:
-            usd_made = tx.inr_settlement / tx.forex_rate_inr_in_usd
-            profit_per_person = "%.4g%%" % ( (usd_made-tx.cost_in_usd) / tx.cost_in_usd * 100 / 2)
-            profit_per_person = profit_per_person.ljust(5)
-        else:
-            profit_per_person = " - "
-            profit_per_person = profit_per_person.center(5)
+        usd_made = tx.inr_settlement / tx.forex_rate_inr_in_usd
+        profit_per_person = "%.4g%%" % ( (usd_made-tx.cost_in_usd) / tx.cost_in_usd * 100 / 2)
+        profit_per_person = profit_per_person.ljust(5)
 
         text+="\n`%s` | `%s` | `%s`|" %(usd_cost,inr_settlement,profit_per_person)
     return text

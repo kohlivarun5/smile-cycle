@@ -9,5 +9,5 @@ class CoinbaseCoindeltaTransaction(ndb.Model):
     seller_id = ndb.IntegerProperty()
     cost_in_usd = ndb.FloatProperty(required=True)
     forex_rate_inr_in_usd = ndb.FloatProperty(required=True)
-    inr_settlement = ndb.FloatProperty()
-    fees_to_buy_in_usd = ndb.FloatProperty()
+    inr_settlement = ndb.FloatProperty(default=0.)
+    fees_to_buy_in_usd = ndb.FloatProperty(default=0.)
