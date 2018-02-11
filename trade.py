@@ -48,13 +48,16 @@ def update_tx(tx_id,inr_settlement=None,fees_to_buy_in_usd=None):
 
 def tx_list_summary(chat_id):
     query = CoinbaseCoindeltaTransaction.query(
-                CoinbaseCoindeltaTransaction.chat_id == chat_id)
+                CoinbaseCoindeltaTransaction.chat_id == chat_id
+            ).order(-CoinbaseCoindeltaTransaction.date)
     
     text = "Trades:\n"
-    text += "`Cost($)` | `Made(Rs)` | `%(pp)  `|"
+    text += "`Date  `|`Cost($)`|`Made(Rs)`|`%(pp)  `|"
     total_cost_usd = 0
     total_profit_per_person_usd = 0 
     for tx in query:
+        date = tx.date.strftime('%d%b').ljust(6)
+
         inr_settlement = "%.4g" % tx.inr_settlement
         inr_settlement = inr_settlement.ljust(8)
 
@@ -69,7 +72,7 @@ def tx_list_summary(chat_id):
         profit_per_person = "%.4g%%" % ( (profit) / trade_cost * 100 )
         profit_per_person = profit_per_person.ljust(5)
 
-        text+="\n`%s` | `%s` | `%s`|" %(usd_cost,inr_settlement,profit_per_person)
+        text+="\n`%s`|`%s`|`%s`|`%s`|" %(date,usd_cost,inr_settlement,profit_per_person)
     return (total_cost_usd,total_profit_per_person_usd,text)
 
 from datastore.BankSettlement import BankSettlement 
@@ -84,7 +87,8 @@ def save_bank_settlement(chat_id,sender_id,amount_usd):
 
 def bank_settlement_summary(chat_id):
     query = BankSettlement.query(
-                BankSettlement.chat_id == chat_id)
+                BankSettlement.chat_id == chat_id
+            ).order(-BankSettlement.date)
     
     text = "Settlements:\n"
     text+= "`Date  ` | `Amount($)` |"
