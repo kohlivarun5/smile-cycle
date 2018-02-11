@@ -52,25 +52,25 @@ def tx_list_summary(chat_id):
             ).order(-CoinbaseCoindeltaTransaction.date)
     
     text = "Trades:\n"
-    text += "`Date  `|`Cost($)`|`Made(Rs)`|`%(pp)  `|"
+    text += "`Date  `|`Cost$`|`Made(Rs)`|`%(pp)  `|"
     total_cost_usd = 0
     total_profit_per_person_usd = 0 
     for tx in query:
         date = tx.date.strftime('%d%b').ljust(6)
 
-        inr_settlement = "%.4g" % tx.inr_settlement
+        inr_settlement = "%.0f" % tx.inr_settlement
         inr_settlement = inr_settlement.ljust(8)
 
         trade_cost = tx.cost_in_usd + tx.fees_to_buy_in_usd
         total_cost_usd += trade_cost
-        usd_cost = "%.4g" % trade_cost
-        usd_cost = usd_cost.ljust(7)
+        usd_cost = "%.0f" % trade_cost
+        usd_cost = usd_cost.ljust(5)
 
         usd_made = tx.inr_settlement / tx.forex_rate_inr_in_usd
         profit = (usd_made - trade_cost)/2
         total_profit_per_person_usd += profit
-        profit_per_person = "%.4g%%" % ( (profit) / trade_cost * 100 )
-        profit_per_person = profit_per_person.ljust(5)
+        profit_per_person = "%.2f%" % ( (profit) / trade_cost * 100 )
+        profit_per_person = profit_per_person.ljust(4)
 
         text+="\n`%s`|`%s`|`%s`|`%s`|" %(date,usd_cost,inr_settlement,profit_per_person)
     return (total_cost_usd,total_profit_per_person_usd,text)
