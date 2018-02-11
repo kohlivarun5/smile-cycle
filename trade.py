@@ -31,7 +31,7 @@ def save_tx(tx,chat_id,buyer_id):
     key = CoinbaseCoindeltaTransaction(chat_id=chat_id,
                                        tx_id=tx.id,
                                        buyer_id=buyer_id,
-                                       cost_in_usd=float(tx.native_amount.amount),
+                                       cost_in_usd=abs(float(tx.native_amount.amount)),
                                        forex_rate_inr_in_usd=float(fx),
                                        id=tx.id)
     key.put()
@@ -50,22 +50,60 @@ def tx_list_summary(chat_id):
     query = CoinbaseCoindeltaTransaction.query(
                 CoinbaseCoindeltaTransaction.chat_id == chat_id)
     
-    text = "`Cost($)` | `Made(Rs)` | `%(pp)  `|"
+    text = "Trades:\n"
+    text += "`Cost($)` | `Made(Rs)` | `%(pp)  `|"
     total_cost_usd = 0
+    total_profit_per_person_usd = 0 
     for tx in query:
         inr_settlement = "%.4g" % tx.inr_settlement
         inr_settlement = inr_settlement.ljust(8)
 
-        total_cost_usd += tx.cost_in_usd
-        usd_cost = "%.4g" % (tx.cost_in_usd * -1)
+        trade_cost = tx.cost_in_usd + tx.fees_to_buy_in_usd
+        total_cost_usd += trade_cost
+        usd_cost = "%.4g" % trade_cost
         usd_cost = usd_cost.ljust(7)
 
         usd_made = tx.inr_settlement / tx.forex_rate_inr_in_usd
-        profit_per_person = "%.4g%%" % ( (usd_made-tx.cost_in_usd) / tx.cost_in_usd * 100 / 2)
+        profit = (usd_made - trade_cost)/2
+        total_profit_per_person_usd += profit
+        profit_per_person = "%.4g%%" % ( (profit) / trade_cost * 100 )
         profit_per_person = profit_per_person.ljust(5)
 
         text+="\n`%s` | `%s` | `%s`|" %(usd_cost,inr_settlement,profit_per_person)
-    return text
+    return (total_cost_usd,total_profit_per_person_usd,text)
+
+from datastore.BankSettlement import BankSettlement 
+def save_bank_settlement(chat_id,sender_id,amount_usd):
+    fx = forex.get_prices()['bid']['usd_inr']
+    key = BankSettlement(chat_id=chat_id,
+                         sender_id=sender_id,
+                         amount_usd=amount_usd,
+                         amount_inr=(amount_usd*float(fx)))
+    key.put()
+    return "Done"
+
+def bank_settlement_summary(chat_id):
+    query = BankSettlement.query(
+                BankSettlement.chat_id == chat_id)
+    
+    text = "Settlements:\n"
+    text+= "`Date  ` | `Amount($)` |"
+    total_amount_usd = 0
+    for settlement in query:
+        date = settlement.date.strftime('%d%b').ljust(6)
+        total_amount_usd+= settlement.amount_usd
+        amount_usd = "%.4g" % settlement.amount_usd
+        amount_usd = amount_usd.ljust(9)
+        text+="\n`%s` | `%s` |" % (date,amount_usd)
+    return (total_amount_usd,text)
+
+def summary_of_history(total_cost_usd,total_profit_per_person_usd,total_amount_usd):
+    text="Summary:"
+    text+="\nTotal Profit: $%.4g_(%.4g%%)_" % (total_profit_per_person_usd,(total_profit_per_person_usd/total_cost_usd*100))
+    text+="\nTotal Cost: $%.4g" % total_cost_usd
+    text+="\nTotal Settled: $%.4g" % total_amount_usd
+    text+="\nPending: $*%.4g*" % (total_cost_usd-total_amount_usd)
+    return text 
 
 def send_coinbase_coindelta(COINBASE_API_KEY,COINBASE_API_SECRET,amount,currency):
     client = coinbase_api.client(COINBASE_API_KEY,COINBASE_API_SECRET)
