@@ -37,12 +37,14 @@ def save_tx(tx,chat_id,buyer_id):
     key.put()
     return "Done"
 
-def update_tx(tx_id,inr_settlement=None,fees_to_buy_in_usd=None):
+def update_tx(tx_id,inr_settlement=None,seller_id=None,fees_to_buy_in_usd=None):
     db_tx = CoinbaseCoindeltaTransaction.get_by_id(tx_id)
     if inr_settlement:
         db_tx.inr_settlement = inr_settlement
     if fees_to_buy_in_usd:
         db_tx.fees_to_buy_in_usd=fees_to_buy_in_usd
+    if seller_id:
+        db_tx.seller_id=seller_id
     db_tx.put()
     return "Done"
 
@@ -52,24 +54,24 @@ def tx_list_summary(chat_id):
             ).order(-CoinbaseCoindeltaTransaction.date)
     
     text = "Trades:\n"
-    text += "`Date  `|`Cost($)`|`Made(Rs)`|`%(pp)  `|"
+    text += "`Date  `|`Cost$`|`Made(Rs)`|`%(pp)`|"
     total_cost_usd = 0
     total_profit_per_person_usd = 0 
     for tx in query:
         date = tx.date.strftime('%d%b').ljust(6)
 
-        inr_settlement = "%.4g" % tx.inr_settlement
+        inr_settlement = "%.0f" % tx.inr_settlement
         inr_settlement = inr_settlement.ljust(8)
 
         trade_cost = tx.cost_in_usd + tx.fees_to_buy_in_usd
         total_cost_usd += trade_cost
-        usd_cost = "%.4g" % trade_cost
-        usd_cost = usd_cost.ljust(7)
+        usd_cost = "%.0f" % trade_cost
+        usd_cost = usd_cost.ljust(5)
 
         usd_made = tx.inr_settlement / tx.forex_rate_inr_in_usd
         profit = (usd_made - trade_cost)/2
         total_profit_per_person_usd += profit
-        profit_per_person = "%.4g%%" % ( (profit) / trade_cost * 100 )
+        profit_per_person = "%.2f" % ( (profit) / trade_cost * 100 )
         profit_per_person = profit_per_person.ljust(5)
 
         text+="\n`%s`|`%s`|`%s`|`%s`|" %(date,usd_cost,inr_settlement,profit_per_person)
@@ -103,10 +105,10 @@ def bank_settlement_summary(chat_id):
 
 def summary_of_history(total_cost_usd,total_profit_per_person_usd,total_amount_usd):
     text="Summary:"
-    text+="\nTotal Profit: $%.4g_(%.4g%%)_" % (total_profit_per_person_usd,(total_profit_per_person_usd/total_cost_usd*100))
-    text+="\nTotal Cost: $%.4g" % total_cost_usd
-    text+="\nTotal Settled: $%.4g" % total_amount_usd
-    text+="\nPending: $*%.4g*" % (total_cost_usd-total_amount_usd)
+    text+="\nTotal Profit: $%.0f_(%.2f%%)_" % (total_profit_per_person_usd,(total_profit_per_person_usd/total_cost_usd*100))
+    text+="\nTotal Cost: $%.0f" % total_cost_usd
+    text+="\nTotal Settled: $%.0f" % total_amount_usd
+    text+="\nPending: *$%.2f*" % (total_cost_usd+total_profit_per_person_usd-total_amount_usd)
     return text 
 
 def send_coinbase_coindelta(COINBASE_API_KEY,COINBASE_API_SECRET,amount,currency):
