@@ -108,7 +108,7 @@ def summary_of_history(total_cost_usd,total_profit_per_person_usd,total_amount_u
     text+="\nTotal Profit: $%.4g_(%.4g%%)_" % (total_profit_per_person_usd,(total_profit_per_person_usd/total_cost_usd*100))
     text+="\nTotal Cost: $%.4g" % total_cost_usd
     text+="\nTotal Settled: $%.4g" % total_amount_usd
-    text+="\nPending: *$%.4g*" % (total_cost_usd-total_amount_usd)
+    text+="\nPending: *$%.4g*" % (total_cost_usd+total_profit_per_person_usd-total_amount_usd)
     return text 
 
 def send_coinbase_coindelta(COINBASE_API_KEY,COINBASE_API_SECRET,amount,currency):
