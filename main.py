@@ -62,8 +62,8 @@ class SetWebhookHandler(webapp2.RequestHandler):
 
 
 import calculate_arb,formatting,trade
-def hello(fr):
-    return "Hello %s!\nID:%s" % (fr.get("first_name"),fr.get('id'))
+def hello(fr,chat_id):
+    return "Hello %s!\nID:%s\nChatID:%s" % (fr.get("first_name"),fr.get('id'),chat_id)
 
 def handle_send_from(exchange,text):
     (amount,currency) = formatting.parse_send_message(text)
@@ -87,13 +87,13 @@ def get_tx_info(text,reply_to_text):
     tx = get_transaction(id)
     return trade.coinbase_transaction_info(tx)
 
-def replyToTelegram(msg,chat_id,message_id):
+def replyToTelegram(msg,chat_id,message_id=None):
     resp = urllib2.urlopen(BASE_URL + 'sendMessage', urllib.urlencode({
         'chat_id': str(chat_id),
         'text': msg.encode('utf-8'),
         'parse_mode' : 'Markdown',
         'disable_web_page_preview': 'true',
-        'reply_to_message_id': str(message_id),
+        'reply_to_message_id': str(message_id) if message_id else message_id,
     }), timeout = 30).read()
     logging.info('send response:')
     logging.info(resp)
@@ -125,6 +125,16 @@ def get_tx_info_task(tx_id,chat_id,message_id,max_count,count,countdown):
         replyToTelegram(msg,chat_id,message_id)
         enqueueTxTask(transaction,chat_id,message_id,max_count,count=count+1,countdown=countdown)
 
+
+SUBSCRIPTION_CHAT_IDS = [
+    #529093774,
+    -255808834
+]
+class NotifyArbHandler(webapp2.RequestHandler):
+    def get(self):
+        text = formatting.text_of_arbs(calculate_arb.coinbase_coindelta())
+        for chat_id in SUBSCRIPTION_CHAT_IDS:
+            replyToTelegram(text,chat_id)
 
 class WebhookHandler(webapp2.RequestHandler):
     def post(self):
@@ -167,7 +177,7 @@ class WebhookHandler(webapp2.RequestHandler):
                     reply('Bot disabled')
                     setEnabled(chat_id, False)
                 elif text.startswith('/hello'):
-                    reply(hello(fr))
+                    reply(hello(fr,chat_id))
                 elif text.startswith('/arb_koinex'):
                     reply(formatting.text_of_arbs(calculate_arb.coinbase_koinex()))
                 elif text.startswith('/arb_crypto'):
@@ -218,4 +228,5 @@ app = webapp2.WSGIApplication([
     ('/updates', GetUpdatesHandler),
     ('/set_webhook', SetWebhookHandler),
     ('/webhook', WebhookHandler),
+    ('/notify_arb', NotifyArbHandler),
 ], debug=True)
