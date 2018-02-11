@@ -1,0 +1,10 @@
+cron:
+- description: "Morning arb"
+  url: /send_notifications
+  schedule: every day 10:00
+- description: "Afternoon arb"
+  url: /send_notifications
+  schedule: every day 13:00
+- description: "Evening arb"
+  url: /send_notifications
+  schedule: every day 23:00
