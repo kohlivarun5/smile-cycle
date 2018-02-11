@@ -1,13 +1,13 @@
 cron:
 - description: "Early Morning arb"
   url: /notify_arb
-  schedule: every day 14:00
+  schedule: every day 13:30
 - description: "Morning arb"
   url: /notify_arb
-  schedule: every day 15:30
+  schedule: every day 15:00
 - description: "Afternoon arb"
   url: /notify_arb
-  schedule: every day 18:30
+  schedule: every day 18:00
 - description: "Evening arb"
   url: /notify_arb
-  schedule: every day 4:30
+  schedule: every day 4:00
