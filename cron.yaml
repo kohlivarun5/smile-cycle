@@ -1,4 +1,7 @@
 cron:
+- description: "Early Morning arb"
+  url: /send_notifications
+  schedule: every day 8:30
 - description: "Morning arb"
   url: /send_notifications
   schedule: every day 10:00
