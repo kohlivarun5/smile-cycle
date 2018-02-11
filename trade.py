@@ -37,12 +37,14 @@ def save_tx(tx,chat_id,buyer_id):
     key.put()
     return "Done"
 
-def update_tx(tx_id,inr_settlement=None,fees_to_buy_in_usd=None):
+def update_tx(tx_id,inr_settlement=None,seller_id=None,fees_to_buy_in_usd=None):
     db_tx = CoinbaseCoindeltaTransaction.get_by_id(tx_id)
     if inr_settlement:
         db_tx.inr_settlement = inr_settlement
     if fees_to_buy_in_usd:
         db_tx.fees_to_buy_in_usd=fees_to_buy_in_usd
+    if seller_id:
+        db_tx.seller_id=seller_id
     db_tx.put()
     return "Done"
 
@@ -52,7 +54,7 @@ def tx_list_summary(chat_id):
             ).order(-CoinbaseCoindeltaTransaction.date)
     
     text = "Trades:\n"
-    text += "`Date  `|`Cost$`|`Made(Rs)`|`%(pp)  `|"
+    text += "`Date  `|`Cost$`|`Made(Rs)`|`%(pp)`|"
     total_cost_usd = 0
     total_profit_per_person_usd = 0 
     for tx in query:
@@ -69,8 +71,8 @@ def tx_list_summary(chat_id):
         usd_made = tx.inr_settlement / tx.forex_rate_inr_in_usd
         profit = (usd_made - trade_cost)/2
         total_profit_per_person_usd += profit
-        profit_per_person = "%.2f%" % ( (profit) / trade_cost * 100 )
-        profit_per_person = profit_per_person.ljust(4)
+        profit_per_person = "%.2f" % ( (profit) / trade_cost * 100 )
+        profit_per_person = profit_per_person.ljust(5)
 
         text+="\n`%s`|`%s`|`%s`|`%s`|" %(date,usd_cost,inr_settlement,profit_per_person)
     return (total_cost_usd,total_profit_per_person_usd,text)
@@ -106,7 +108,7 @@ def summary_of_history(total_cost_usd,total_profit_per_person_usd,total_amount_u
     text+="\nTotal Profit: $%.4g_(%.4g%%)_" % (total_profit_per_person_usd,(total_profit_per_person_usd/total_cost_usd*100))
     text+="\nTotal Cost: $%.4g" % total_cost_usd
     text+="\nTotal Settled: $%.4g" % total_amount_usd
-    text+="\nPending: $*%.4g*" % (total_cost_usd-total_amount_usd)
+    text+="\nPending: *$%.4g*" % (total_cost_usd-total_amount_usd)
     return text 
 
 def send_coinbase_coindelta(COINBASE_API_KEY,COINBASE_API_SECRET,amount,currency):

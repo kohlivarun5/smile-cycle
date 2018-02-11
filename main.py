@@ -92,12 +92,13 @@ def save_tx(reply_to_text,chat_id,buyer_id):
     tx = get_transaction(tx_id)
     return trade.save_tx(tx,chat_id,buyer_id)
 
-def update_tx(reply_to_text,inr_settlement=None,fees_to_buy_in_usd=None):
+def update_tx(reply_to_text,inr_settlement=None,seller_id=None,fees_to_buy_in_usd=None):
     if reply_to_text is None:
         return "Reply to a transaction message to get it's info!"
     tx_id = trade.parse_coinbase_transaction_id(reply_to_text)
     return trade.update_tx(tx_id,
                            inr_settlement=inr_settlement,
+                           seller_id=seller_id,
                            fees_to_buy_in_usd=fees_to_buy_in_usd)
 
 def replyToTelegram(msg,chat_id,message_id=None):
@@ -236,6 +237,7 @@ class WebhookHandler(webapp2.RequestHandler):
                 elif text.startswith('/tx_sold_inr'):
                     text = update_tx(
                                 reply_to_text,
+                                seller_id=fr.get('id'),
                                 inr_settlement=float(text.split(' ')[1]))
                     reply(text)
 
