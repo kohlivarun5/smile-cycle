@@ -14,6 +14,9 @@ def get_prices(download=1):
   koinex = query()
   for prod in koinex['stats'].keys():
     market = koinex['stats'][prod]
-    prices['bid'][prod.lower() + "_inr"] = float(market['highest_bid'])
-    prices['ask'][prod.lower() + "_inr"] = float(market['lowest_ask'])
+    highest_bid = market.get('highest_bid')
+    lowest_ask = market.get('lowest_ask')
+    if highest_bid and lowest_ask:
+        prices['bid'][prod.lower() + "_inr"] = float(highest_bid)
+        prices['ask'][prod.lower() + "_inr"] = float(lowest_ask)
   return prices
