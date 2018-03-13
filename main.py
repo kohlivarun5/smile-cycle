@@ -147,9 +147,11 @@ SUBSCRIPTION_CHAT_IDS = [
 ]
 class NotifyArbHandler(webapp2.RequestHandler):
     def get(self):
-        text = formatting.text_of_arbs(calculate_arb.coinbase_coindelta())
-        for chat_id in SUBSCRIPTION_CHAT_IDS:
-            replyToTelegram(text,chat_id)
+        texts = [formatting.text_of_arbs(calculate_arb.coinbase_coindelta()),
+                 formatting.text_of_arbs(calculate_arb.coinbase_koinex())]
+        for text in texts:
+            for chat_id in SUBSCRIPTION_CHAT_IDS:
+                replyToTelegram(text,chat_id)
 
 class WebhookHandler(webapp2.RequestHandler):
     def post(self):
