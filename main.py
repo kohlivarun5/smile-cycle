@@ -134,7 +134,7 @@ def get_tx_info_task(tx_id,chat_id,message_id,max_count,count,countdown,target_c
     if transaction:
         msg = trade.coinbase_transaction_info(transaction)
         replyToTelegram(msg,chat_id,message_id)
-        enqueueTxTask(transaction,chat_id,message_id,max_count,count=count+1,countdown=countdown,target_confirmations=target_confirmations)
+        enqueueTxTask(transaction,chat_id,message_id,target_confirmations=target_confirmations,max_count=max_count,count=count+1,countdown=countdown)
 
 
 SUBSCRIPTION_CHAT_IDS = [
