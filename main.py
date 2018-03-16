@@ -62,12 +62,14 @@ import calculate_arb,formatting,trade
 def hello(fr,chat_id):
     return "Hello %s!\nID:%s\nChatID:%s" % (fr.get("first_name"),fr.get('id'),chat_id)
 
-def handle_send_from(exchange,text):
+def handle_send_from(from_exch,to_exch,text):
     (amount,currency) = formatting.parse_send_message(text)
-    if exchange == "coinbase":
+    if from_exch == "coinbase" and to_exch == "coindelta":
         return trade.send_coinbase_coindelta(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET,amount,currency)
+    elif from_exch == "coinbase" and to_exch == "koinex":
+        return trade.send_coinbase_koinex(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET,amount,currency)
     else:
-        raise UserWarning("Unknown exchange: %s" % exchange)
+        raise UserWarning("Unknown send for %s -> %s" % (from_exch,to_exch))
 
 def get_transaction(id):
     from exchanges import coinbase_api
@@ -109,9 +111,7 @@ def replyToTelegram(msg,chat_id,message_id=None):
     logging.info('send response:')
     logging.info(resp)
 
-def enqueueTxTask(tx,chat_id,message_id,max_count=60,count=0,countdown=120):
-    from exchanges import coindelta
-    target_confirmations = coindelta.CONFIRMATIONS.get(tx["to"]["currency"])
+def enqueueTxTask(tx,chat_id,message_id,target_confirmations=None,max_count=60,count=0,countdown=120):
     if target_confirmations is None:
         target_confirmations = 10
 
@@ -122,9 +122,9 @@ def enqueueTxTask(tx,chat_id,message_id,max_count=60,count=0,countdown=120):
         return
 
     from google.appengine.ext import deferred
-    deferred.defer(get_tx_info_task, tx.id,chat_id,message_id,max_count,count,countdown,_countdown=countdown)
+    deferred.defer(get_tx_info_task, tx.id,chat_id,message_id,max_count,count,countdown,target_confirmations,_countdown=countdown)
 
-def get_tx_info_task(tx_id,chat_id,message_id,max_count,count,countdown):
+def get_tx_info_task(tx_id,chat_id,message_id,max_count,count,countdown,target_confirmations):
     if count >= max_count:
         logging.info("Reached max count for task")
         replyToTelegram("Reached max count for task. Request status manually now!",chat_id,message_id)
@@ -134,7 +134,7 @@ def get_tx_info_task(tx_id,chat_id,message_id,max_count,count,countdown):
     if transaction:
         msg = trade.coinbase_transaction_info(transaction)
         replyToTelegram(msg,chat_id,message_id)
-        enqueueTxTask(transaction,chat_id,message_id,max_count,count=count+1,countdown=countdown)
+        enqueueTxTask(transaction,chat_id,message_id,max_count,count=count+1,countdown=countdown,target_confirmations=target_confirmations)
 
 
 SUBSCRIPTION_CHAT_IDS = [
@@ -211,12 +211,22 @@ class WebhookHandler(webapp2.RequestHandler):
                             credentials.COINBASE_API_SECRET))
 
                 # Initiate trade
-                elif text.startswith('/send_from_coinbase'):
+                elif text.startswith('/send_coinbase_to_coindelta'):
                     if credentials.ID_VARUN_KOHLI == fr.get('id'):
-                        tx = handle_send_from("coinbase",text)
+                        tx,target_confirmations = handle_send_from("coinbase","coindelta",text)
                         tx_text = trade.coinbase_transaction_info(tx)
                         reply(tx_text)
-                        enqueueTxTask(tx,chat_id,message_id)
+                        enqueueTxTask(tx,chat_id,message_id,target_confirmations=target_confirmations)
+                        trade.save_tx(tx,chat_id,fr.get('id'))
+                    else:
+                        reply("You are not allowed to initiate send from coinbase")
+
+                elif text.startswith('/send_coinbase_to_koinex'):
+                    if credentials.ID_VARUN_KOHLI == fr.get('id'):
+                        tx,target_confirmations = handle_send_from("coinbase","koinex",text)
+                        tx_text = trade.coinbase_transaction_info(tx)
+                        reply(tx_text)
+                        enqueueTxTask(tx,chat_id,message_id,target_confirmations=target_confirmations)
                         trade.save_tx(tx,chat_id,fr.get('id'))
                     else:
                         reply("You are not allowed to initiate send from coinbase")

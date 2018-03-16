@@ -1,5 +1,5 @@
 import logging
-from exchanges import coinbase_api,coindelta
+from exchanges import coinbase_api
 
 COINBASE_TRANSACTION_ID_BASE="Coinbase Transaction id: "
 
@@ -112,14 +112,28 @@ def summary_of_history(total_cost_usd,total_profit_per_person_usd,total_amount_u
     return text 
 
 def send_coinbase_coindelta(COINBASE_API_KEY,COINBASE_API_SECRET,amount,currency):
+    from exchanges import coindelta
     client = coinbase_api.client(COINBASE_API_KEY,COINBASE_API_SECRET)
     to = coindelta.ADDRESSES.get(currency)
     if to == None:
         raise UserWarning("No coindelta address for currency:%s" % currency)
     tx = coinbase_api.send(client,to,amount,currency)
     print(tx)
+    target_confirmations = coindelta.CONFIRMATIONS.get(tx["to"]["currency"])
     logging.info(tx)
-    return tx
+    return (tx,target_confirmations)
+
+def send_coinbase_koinex(COINBASE_API_KEY,COINBASE_API_SECRET,amount,currency):
+    from exchanges import koinex
+    client = coinbase_api.client(COINBASE_API_KEY,COINBASE_API_SECRET)
+    to = koinex.ADDRESSES.get(currency)
+    if to == None:
+        raise UserWarning("No koinex address for currency:%s" % currency)
+    tx = coinbase_api.send(client,to,amount,currency)
+    print(tx)
+    target_confirmations = koinex.CONFIRMATIONS.get(tx["to"]["currency"])
+    logging.info(tx)
+    return (tx,target_confirmations)
 
 def get_coinbase_balance(COINBASE_API_KEY,COINBASE_API_SECRET):
     client = coinbase_api.client(credentials.COINBASE_API_KEY,credentials.COINBASE_API_SECRET)
