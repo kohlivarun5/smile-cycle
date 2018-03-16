@@ -144,11 +144,11 @@ SUBSCRIPTION_CHAT_IDS = [
 ]
 class NotifyArbHandler(webapp2.RequestHandler):
     def get(self):
-        texts = [formatting.text_of_arbs(calculate_arb.coinbase_coindelta()),
-                 formatting.text_of_arbs(calculate_arb.coinbase_koinex())]
-        for text in texts:
-            for chat_id in SUBSCRIPTION_CHAT_IDS:
-                replyToTelegram(text,chat_id)
+        text = formatting.text_of_arbs(calculate_arb.coinbase_coindelta())
+        text += "\n"
+        text += formatting.text_of_arbs(calculate_arb.coinbase_koinex())
+        for chat_id in SUBSCRIPTION_CHAT_IDS:
+            replyToTelegram(text,chat_id)
 
 class WebhookHandler(webapp2.RequestHandler):
     def post(self):
@@ -196,12 +196,13 @@ class WebhookHandler(webapp2.RequestHandler):
                     reply(hello(fr,chat_id))
 
                 # Arb commands
-                elif text.startswith('/arb_koinex'):
-                    reply(formatting.text_of_arbs(calculate_arb.coinbase_koinex()))
                 elif text.startswith('/arb_crypto'):
                     reply(formatting.text_of_arbs(calculate_arb.binance_kucoin()))
                 elif text.startswith('/arb'):
-                    reply(formatting.text_of_arbs(calculate_arb.coinbase_coindelta()))
+                    text = formatting.text_of_arbs(calculate_arb.coinbase_coindelta())
+                    text += "\n"
+                    text += formatting.text_of_arbs(calculate_arb.coinbase_koinex())
+                    reply(text)
 
                 # Trade commands
                 # Balance
