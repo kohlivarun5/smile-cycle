@@ -103,9 +103,88 @@ def binance_kucoin():
                     result.append({'from' : i, 'to' : j, 'coin' : coin, 'gain_perc' : (sell - buy_amt)*100/buy_amt})
     return result
 
+from exchanges import bitstamp
+def coinbase_bitstamp():
+    prices = {}
+    prices['coinbase'] = coinbase_api.get_prices()
+    prices['bitstamp'] = bitstamp.get_prices()
+    result = []
+
+    for cb_curr,cb_quote in prices['coinbase']['ask'].iteritems():
+        for bs_curr,bs_quote in prices['bitstamp']['bid'].iteritems():
+
+            if cb_curr != bs_curr:
+                continue # Not doing 3 way arb 
+
+            # Both currencies same, check if we can go either way
+            if (cb_quote > bs_quote):
+                continue # Ask is more than Bid
+
+            spread = (bs_quote - cb_quote) / cb_quote * 100
+            if spread > 1:
+                result.append({'from' : 'coinbase', 'to' : 'bitstamp', 'coin' : cb_curr.split('_')[0].upper(), 'gain_perc' : spread})
+
+    for cb_curr,cb_quote in prices['coinbase']['bid'].iteritems():
+        for bs_curr,bs_quote in prices['bitstamp']['ask'].iteritems():
+
+            if cb_curr != bs_curr:
+                continue # Not doing 3 way arb 
+
+            # Both currencies same, check if we can go either way
+            if (bs_quote > cb_quote):
+                continue # Ask is more than Bid
+
+            spread = (cb_quote - bs_quote) / bs_quote * 100
+            if spread > 1:
+                result.append({'from' : 'bitstamp', 'to' : 'coinbase', 'coin' : cb_curr.split('_')[0].upper(), 'gain_perc' : spread})
+
+    return result
+
+from exchanges import bitstamp
+def bitstamp_3way():
+    prices = {}
+    prices['bitstamp'] = bitstamp.get_prices()
+    print prices
+    result = []
+
+    notional = 100
+    for bs_curr,ask in prices['bitstamp']['ask'].iteritems():
+        (foreign,domestic) = bs_curr.split('_')
+        if domestic != 'usd':
+            continue
+        
+        for_amt = notional/ask
+
+        for cur2,ask2 in prices['bitstamp']['ask'].iteritems():
+            (f2,d2) = cur2.split('_')
+            if d2 != foreign:
+                continue
+
+            # d2 is foreign
+            third_amt = for_amt/ask2
+
+            for cur3,bid in prices['bitstamp']['bid'].iteritems():
+                (f3,d3) = cur3.split('_')
+                if d3 != domestic or f3 != f2:
+                    continue
+            
+
+                final_notional = third_amt*bid
+
+                print (bs_curr,cur2,cur3)
+                print (ask,ask2,bid)
+                print (for_amt,third_amt,final_notional)
+
+                profit = (final_notional - notional) / notional * 100 
+
+                if profit > 1:
+                    result.append({'from' : 'bitstamp', 'to' : 'bitstamp', 'coin' : ("Buy %s using %s, Buy %s, sell for %s" % (foreign,domestic,f2,domestic)), 'gain_perc' : profit})
+
+    return result
 
 import unittest
 class TestCalcs(unittest.TestCase):
+    """
     def test_coinbase_coindelta(self):
         arbs = coinbase_coindelta()
         #import formatting
@@ -134,4 +213,20 @@ class TestCalcs(unittest.TestCase):
                 self.assertEqual("koinex",arb["to"])
                 self.assertEqual(3,len(arb["coin"]))
                 self.assertEqual("float",type(arb["gain_perc"]).__name__)
+    def test_coinbase_bitstamp(self):
+        arbs = coinbase_bitstamp()
+        #import formatting
+        #print(formatting.text_of_arbs(arbs))
+        print arbs
+        if len(arbs) != 0:
+            for arb in arbs:
+                self.assertIn(arb["from"],["coinbase","bitstamp"])
+                self.assertIn(arb["to"],["coinbase","bitstamp"])
+                self.assertEqual(3,len(arb["coin"]))
+                self.assertEqual("float",type(arb["gain_perc"]).__name__)
+    """
+
+    def test_coinbase_bitstamp(self):
+        arbs = bitstamp_3way()
+        print arbs
 
